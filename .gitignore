@@ -1,3 +1,11 @@
+*.sublime-workspace
+package-lock.json
+models/
+COLLADA2GLTF/
+*.zip
+__three.js-master/
+__cn_three.js/
+
 # Logs
 logs
 *.log
@@ -102,3 +110,4 @@ dist
 
 # TernJS port file
 .tern-port
+

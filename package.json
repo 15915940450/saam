@@ -1,0 +1,22 @@
+{
+  "name": "saam",
+  "version": "1.0.0",
+  "description": "learning three.js",
+  "main": "entry.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/15915940450/saam.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/15915940450/saam/issues"
+  },
+  "homepage": "https://github.com/15915940450/saam#readme",
+  "dependencies": {
+    "obj2gltf": "^3.1.0"
+  }
+}
