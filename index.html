@@ -10,22 +10,88 @@
     width: 900px;
     height: 700px;
     background:silver;
+    clip-path: circle(600px at 50px 50px);
+    transition: all .2s ease-out;
+    
   }
+  .__test:hover{
+    /*clip-path: circle(500px at 50px 50px);*/
+  }
+  .expand-range {
+    position: relative;
+  }
+  .expand-range:after {
+    content: '';
+    position: absolute;
+    top: -10px; right: -10px; bottom: -10px; left: -10px;
+    background: rgba(100,100,100,0.5);
+  }
+  .br{
+    border: 1px solid blue;
+    padding: 30px 90px;
+    border-radius:5em 1em;
+  }
+  .mc{
+    background: yellow;
+    width: min-content;
+  }
+  .mc p{
+    width: 190px;
+    height: 360px;
+    margin-left: 60px;
+    position: relative;
+    /* box-shadow: 0 0 0 5px #000 inset,
+                  0 0 0 10px blue inset,
+                  0 0 0 20px #37a inset; */
+                  /*box-shadow: none | inset（可选值，不设置，为外投影，设置，为内投影） x-offset（阴影水平偏移量，正方向为right） y-offset（阴影垂直偏移量，正方向为bottom） blur-radius（阴影模糊半径，为正，0为无模糊效果，值越大，越模糊） spread-radius（阴影扩展半径，可正可负） color*/ 
+    /*box-shadow: 0 5px 4px -4px red;*/
+    /* box-shadow: inset 0 0 0 30px red,
+                      0 5px 4px -2px blue;
+                ; */
+                background: white;
+                /*box-shadow: 0 0 3px 0 black;*/
+                filter: drop-shadow(2px 2px 5px rgba(0,0,0,.5));
+
+      }
+      .mc p:after{
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: -20px;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+        /*border-left-width: 10px;*/
+        border-right-color:white; 
+
+      }
   </style>
 </head>
 <body>
   <div class="__test">
     <!-- console.log(THREE.REVISION); -->
+    <a class="expand-range" href="https://mp.weixin.qq.com/s?__biz=MzA5NzkwNDk3MQ==&mid=2650591487&idx=1&sn=0086b8a3bae0aa363383bb1cc30aa4e4&chksm=8891c0dbbfe649cdf9d7f0c6b843701b8ec5251daec42ae7da24153e35adec00bc960f7a88dc&scene=126&sessionid=1586249374&key=4ed88be3ea0748e57482db15f3bdd579bb1a390b75954ef5e82445c3b5d4abf96939382e3ca5dfc941119b0fe9524579ea8200c7eea6d5cc0b225177311dab27fd52a2b642a0005b3b9966fbc208b851&ascene=1&uin=MTY1Mzc5MjEwMQ%3D%3D&devicetype=Windows+10&version=62080079&lang=zh_TW&exportkey=Ab6Uz7jUP8RoRpdczjJ73iI%3D&pass_ticket=sdr2zSyyVLOsziN4mAefEEXEYjU%2FgDkPiCE6kwytk1BHtSjBYvJttwDQ%2BH5%2Bo6Y%2F">expand range</a>
+    <span>
+      新鸿基地产
+    </span>
+    <a href="javascript:;" class="br">br</a>
+
+    <div class="mc">
+      <span>假使是一张图片</span>
+      <p>国泰航空汇丰控股太古半岛新鸿基地产</p>
+    </div>
+    <span>香港地铁有限公司</span>
   </div>
+  <section>demo</section>
+  <script src="./fundamentals.js" type="module"></script>
   <!-- <script src="./index.js" type="module"></script> -->
-  <script src="./dae.js" type="module"></script>
+  <!-- <script src="./dae.js" type="module"></script> -->
   <!-- <script src="./interactive.js" type="module"></script> -->
 </body>
 </html>
 
 
 <!-- 
-http://www.yanhuangxueyuan.com/
 https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html
 
 webgl_decals
@@ -45,6 +111,12 @@ obj2gltf -i models/source/电池爆炸图2.obj -o models\gltf\dinci.gltf
 
 
 
-学习资源:
+学习资源：
 http://localhost/saam/__three.js-master/docs/index.html#manual/en/introduction/Useful-links(Three.js Fundamentals starting lesson)
+
+实现目标：
+http://www.yanhuangxueyuan.com/3D/jixiezhuangpei/index.html
 -->
+
+
+
