@@ -4,67 +4,158 @@
   <title>local_three.js</title>
   <meta charset="UTF-8" />
   <style>
-  .__test{
-    margin: 50px;
-    border: 5px solid crimson;
-    width: 900px;
-    height: 700px;
-    background:silver;
-    clip-path: circle(600px at 50px 50px);
-    transition: all .2s ease-out;
-    
-  }
-  .__test:hover{
-    /*clip-path: circle(500px at 50px 50px);*/
-  }
-  .expand-range {
-    position: relative;
-  }
-  .expand-range:after {
-    content: '';
-    position: absolute;
-    top: -10px; right: -10px; bottom: -10px; left: -10px;
-    background: rgba(100,100,100,0.5);
-  }
-  .br{
-    border: 1px solid blue;
-    padding: 30px 90px;
-    border-radius:5em 1em;
-  }
-  .mc{
-    background: yellow;
-    width: min-content;
-  }
-  .mc p{
-    width: 190px;
-    height: 360px;
-    margin-left: 60px;
-    position: relative;
-    /* box-shadow: 0 0 0 5px #000 inset,
-                  0 0 0 10px blue inset,
-                  0 0 0 20px #37a inset; */
-                  /*box-shadow: none | inset（可选值，不设置，为外投影，设置，为内投影） x-offset（阴影水平偏移量，正方向为right） y-offset（阴影垂直偏移量，正方向为bottom） blur-radius（阴影模糊半径，为正，0为无模糊效果，值越大，越模糊） spread-radius（阴影扩展半径，可正可负） color*/ 
-    /*box-shadow: 0 5px 4px -4px red;*/
-    /* box-shadow: inset 0 0 0 30px red,
-                      0 5px 4px -2px blue;
-                ; */
-                background: white;
-                /*box-shadow: 0 0 3px 0 black;*/
-                filter: drop-shadow(2px 2px 5px rgba(0,0,0,.5));
+    /* 1.clip-path */
+    .__test{
+      margin: 50px;
+      border: 5px solid crimson;
+      width: 900px;
+      height: 700px;
+      background:silver;
+      clip-path: circle(600px at 50px 50px);
+      transition: all .2s ease-out;
 
-      }
-      .mc p:after{
-        content: '';
-        position: absolute;
-        top: 30px;
-        left: -20px;
-        width: 0;
-        height: 0;
-        border: 10px solid transparent;
-        /*border-left-width: 10px;*/
-        border-right-color:white; 
+    }
+    .__test:hover{
+      /*clip-path: circle(500px at 50px 50px);*/
+    }
+    /*2.a:after*/
+    .expand-range {
+      position: relative;
+    }
+    .expand-range:after {
+      content: '';
+      position: absolute;
+      top: -10px; right: -10px; bottom: -10px; left: -10px;
+      background: rgba(100,100,100,0.5);
+    }
+    /*3.border-radius*/
+    .br{
+      border: 1px solid blue;
+      padding: 30px 90px;
+      border-radius:5em 1em;
+    }
+    /*4.min content*/
+    .mc{
+      background: yellow;
+      width: min-content;
+    }
+    /*5.filter*/
+    html,body{
+      filter:grayscale(100%);
+    }
+    .mc p{
+      width: 190px;
+      height: 260px;
+      margin-left: 60px;
+      position: relative;
+      background: white;
+      filter: drop-shadow(2px 2px 5px rgba(0,0,0,.5));
+    }
+    /*6.transparent*/
+    .mc p:after{
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: -20px;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-right-color:white; 
+    }
+    .demo_section{
+      width: 160px;
+      height: 160px;
+      border: 3px solid rgba(0,0,0,.5); 
+    }
+    /*7.linear-gradient*/
+    .demo_section1{
+      background: repeating-linear-gradient(70deg, #fb3 0, #fb3 15px, #58a 0, #58a 30px);
+      /*background: linear-gradient(45deg, #fb3 25%, #58a 0, #58a 50%, #fb3 0, #fb3 75%, #58a 0);*/
+      /*background-size: 30px 30px;*/
+      /*background: linear-gradient(#fb3 50%, #58a 0);*/
+      /*background-size: 100% 30px; */
+      background-clip: padding-box;
+    }
+    .demo_section2{
+      background: #58a;
+      background-image: linear-gradient(white 1px, transparent 0),
+      linear-gradient(to right, white 1px, transparent 0);
+      background-size: 30px 30px;
+    }
+    .demo_section3{
+      background: #58a;
+      background-image: linear-gradient(white 2px, transparent 0),
+      linear-gradient(to right, white 2px, transparent 0),
+      linear-gradient(rgba(255, 255, 255, .5) 1px, transparent 0),
+      linear-gradient(to right, rgba(255, 255, 255, .5) 1px, transparent 0);
+      background-size: 75px 75px, 75px 75px, 15px 15px, 15px 15px;
+    }
+    .demo_section4{
+      background: #eee;
+      background-image:
+      linear-gradient(45deg, rgba(0, 0, 0, .25) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, .25) 0),
+      linear-gradient(45deg, rgba(0, 0, 0, .25) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, .25) 0);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+    /* 折角 https://blog.csdn.net/u012657197/article/details/75321796 */
+    .demo_section5{
+      width: 200px;
+      height: 100px;
+      padding: 20px;
+      position: relative;
+      border-radius:0.5em;
+      background: linear-gradient(210deg, transparent 1.5em, gray 0);
+      border: none;
+    }
+    .demo_section5:after{
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1.73em;
+      height: 3em;
+      background: linear-gradient(240deg, transparent 50%, silver 0);
+      transform: translateY(-1.3em) rotate(-30deg);
+      transform-origin: bottom right;
+      border-bottom-left-radius: inherit;
+      box-shadow: -0.2em 0.2em 0.3em -0.1em black;
+    }
+    .demo_section6{
+      background:
+      radial-gradient(tan 30%, transparent 0),
+      radial-gradient(tan 30%, transparent 0);
+      background-color: #666;
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+    /*8.flex*/
+    .flex{
+      display: flex;
+    }
+    /*9.bezier*/
+    .bezier p {
+      transform-origin: 1.4em -.4em;
+      transition: transform .5s cubic-bezier(.25, .1, .3, 1.3);
+    }
 
-      }
+    .bezier input:not(:focus) + p {
+      transform: scale(0);
+      transition: transform 300ms; 
+      /*此处是为了缩小时重置transition-timing-function，不触发回弹*/
+    }
+    /*10.panoramic*/
+    @keyframes panoramic {
+      to { background-position: 100% 0; }
+    }
+    .demo_section7 {
+      background: url('http://c3.staticflickr.com/3/2671/3904743709_74bc76d5ac_b.jpg');
+      background-size: auto 100%; 
+      animation: panoramic 10s linear infinite alternate;
+    }
+    .demo_section7:hover {
+      animation-play-state: paused;
+    }
   </style>
 </head>
 <body>
@@ -82,7 +173,20 @@
     </div>
     <span>香港地铁有限公司</span>
   </div>
-  <section>demo</section>
+  <div class="flex">
+    <section class="demo_section7 demo_section">demo2</section>
+    <section class="demo_section demo_section1">demo</section>
+    <section class="demo_section2 demo_section">demo2</section>
+    <section class="demo_section3 demo_section">demo2</section>
+    <section class="demo_section4 demo_section">demo2</section>
+    <section class="demo_section5 demo_section">demo5:https://blog.csdn.net/
+    u012657197/article/details/75321796</section>
+    <section class="demo_section6 demo_section">demo2</section>
+  </div>
+  <div class="bezier">
+    <input type="text">
+    <p>kkk focus transform cubic bezier</p>
+  </div>
   <script src="./fundamentals.js" type="module"></script>
   <!-- <script src="./index.js" type="module"></script> -->
   <!-- <script src="./dae.js" type="module"></script> -->
@@ -112,10 +216,31 @@ obj2gltf -i models/source/电池爆炸图2.obj -o models\gltf\dinci.gltf
 
 
 学习资源：
-http://localhost/saam/__three.js-master/docs/index.html#manual/en/introduction/Useful-links(Three.js Fundamentals starting lesson)
+http://localhost/saam/__three.js-master/docs/index.html#manual/en/introduction/Useful-links (Three.js Fundamentals starting lesson)
 
 实现目标：
 http://www.yanhuangxueyuan.com/3D/jixiezhuangpei/index.html
+
+css3揭秘：
+https://mp.weixin.qq.com/s?__biz=MzA5NzkwNDk3MQ==&mid=2650591487&idx=1&sn=0086b8a3bae0aa363383bb1cc30aa4e4&chksm=8891c0dbbfe649cdf9d7f0c6b843701b8ec5251daec42ae7da24153e35adec00bc960f7a88dc&scene=126&sessionid=1586249374&key=4ed88be3ea0748e57482db15f3bdd579bb1a390b75954ef5e82445c3b5d4abf96939382e3ca5dfc941119b0fe9524579ea8200c7eea6d5cc0b225177311dab27fd52a2b642a0005b3b9966fbc208b851&ascene=1&uin=MTY1Mzc5MjEwMQ%3D%3D&devicetype=Windows+10&version=62080079&lang=zh_TW&exportkey=Ab6Uz7jUP8RoRpdczjJ73iI%3D&pass_ticket=sdr2zSyyVLOsziN4mAefEEXEYjU%2FgDkPiCE6kwytk1BHtSjBYvJttwDQ%2BH5%2Bo6Y%2F
+
+box-shadow:
+(inset) (x-offset) (y-offset) (blur-radius) (spread-radius) (color);
+
+css3 filter:
+➤grayscale 灰度 【值为0-1之间的小数 】
+➤sepia 褐色 【值为0-1之间的小数】　　　　　　
+➤saturate 饱和度 【值为num】　　　　
+➤hue-rotate 色相旋转 【值为angle】　　
+➤invert 反色　 【值为0-1之间的小数】　　　　　
+➤opacity 透明度 【值为0-1之间的小数】　　　　　
+➤brightness 亮度　【值为0-1之间的小数】　　　
+➤contrast 对比度　　【 值为num】　　
+➤blur 模糊　　　【值为length】　　　
+➤drop-shadow 阴影
+
+==============
+end
 -->
 
 
