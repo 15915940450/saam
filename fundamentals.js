@@ -1,36 +1,5 @@
 import * as THREE from './__three.js-master/build/three.module.js';
-console.log(THREE); //THREE={...}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// console.log(THREE); //THREE={...}
 
 
 /*
@@ -44,52 +13,214 @@ console.log(THREE); //THREE={...}
 */
 
 
-/*
-CathayPacificAirways国泰航空公司1
-HSBCHoldings汇丰控股2
-SwirePacific太古集团3
-ThePeninsulaGroup半岛集团4
-SunHungKaiProperties新鸿基地产5
-Shangri-LaAsia香格里拉（亚洲）6
-MandarinOriental香港文华东方7
-EspritHoldings思捷环球8
-HangSengBank恒生银行9
-CheungKong(Holdings)长江实业(集团)有限公司10
+//===============================================
+// https://threejsfundamentals.org/threejs/lessons/threejs-scenegraph.html
+/*function main2(){
+  const canvasCopy=document.querySelector('#c');
+  const renderer=new THREE.WebGLRenderer({canvasCopy});
 
-CLPHoldings中电控股11
-Li&Fung利丰有限公司12
-HutchisonWhampoa和记黄埔企业有限公司13
-MTRCorp.香港地铁有限公司14
-DairyFarmInternationalHoldings牛奶国际控股有限公司15
-HongKong&ChinaGas(Towngas)香港中华煤气有限公司16
-KowloonMotorBus九龙巴士股份有限公司17
-GiordanoInternational左丹奴国际18
-TelevisionBroadcasts电视广播有限公司19
-JardineMathesonHoldings怡和控股20
-WharfHoldings九龙仓控股21
-HongkongElectricHoldings香港电灯集团22
-BankofEastAsia东亚银行23
-KerryProperties嘉里建设有限公司24
-PCCW电讯盈科25
-KCR(Kowloon-CantonRailwayCorp.)九广铁路公司26
-HopewellHoldings合和实业有限公司27
-HongKongExchanges&Clearing香港交易所28
-ChinaMobile(HongKong)中国移动（香港）29
-NewWorldDevelopment新世界发展有限公司30
-CITICPacific中信泰富有限公司31
-JohnsonElectricHoldings德昌电机控股有限公司32
-HendersonLandDevelopment恒基兆业地产有限公司33
-HangLungGroup恒隆集团34
-BOCHongKong(Holdings)中银香港（控股）35
-YueYuenIndustrial(Holdings)裕元集团36
-CoscoPacific中远太平洋有限公司37
-LenovoGroup联想集团38
-ChinaUnicom中国联合通信有限公司39
-CNOOC中国海洋石油总公司40
+
+
+
+  const fov=40;
+  const aspect=2;
+  const near=0.1;
+  const far=1000;
+  const camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
+  camera.position.set(0,50,0);
+  camera.up.set(0,0,1);
+  camera.lookAt(0,0,0);
+
+  const scene=new THREE.Scene();
+
+  {
+    const color=0xFFFFFF;
+    const intensity=3;
+    const light=new THREE.PointLight(color,intensity);
+    scene.add(light);
+  }
+
+  const objects=[];
+
+  const radius=1;
+  const widthSegments=6;
+  const heightSegments=6;
+  const sphereGeometry=new THREE.SphereBufferGeometry(radius,widthSegments,heightSegments);
+
+  const solarSystem=new THREE.Object3D();
+  scene.add(solarSystem);
+  objects.push(solarSystem);
+
+  const sunMaterial=new THREE.MeshPhongMaterial({
+    emissive:0xFF0000
+  });
+  const sunMesh=new THREE.Mesh(sphereGeometry,sunMaterial);
+  sunMesh.scale.set(5,5,5);
+
+  solarSystem.add(sunMesh);
+  objects.push(sunMesh);
+
+
+  const earthOrbit=new THREE.Object3D();
+  earthOrbit.position.x=10;
+  solarSystem.add(earthOrbit);
+  objects.push(earthOrbit);
+
+  const earthMaterial = new THREE.MeshPhongMaterial({color: 0x2233FF, emissive: 0x112244});
+  const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+  earthOrbit.add(earthMesh);
+  objects.push(earthMesh);
+
+  const moonOrbit=new THREE.Object3D();
+  moonOrbit.position.x=2;
+  earthOrbit.add(moonOrbit);
+
+
+  const moonMaterial=new THREE.MeshPhongMaterial({
+    color:0x888888,
+    emissive:0x222222
+  });
+  const moonMesh=new THREE.Mesh(sphereGeometry,moonMaterial);
+  moonMesh.scale.set(0.5,0.5,0.5);
+  moonOrbit.add(moonMesh);
+  objects.push(moonMesh);
+
+  objects.forEach((node) => {
+    const axes=new THREE.AxesHelper();
+    axes.material.depthTest=false;
+    axes.renderOrder=1;
+    node.add(axes);
+  });
+
+
+
+  function resizeRendererToDisplaySize(renderer){
+    const canvas=renderer.domElement;
+    const width=canvas.clientWidth;
+    const height=canvas.clientHeight;
+    const needResize=canvas.width!==width || canvas.height!==height;
+    if(needResize){
+      renderer.setSize(width,height,false);
+    }
+
+  }
+  function render(time){
+    time*=0.001;
+    if(resizeRendererToDisplaySize(renderer)){
+      const canvas=renderer.domElement;
+      camera.aspect=canvas.clientWidth/canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+    objects.forEach((obj) => {
+      obj.rotation.y=time;
+    });
+    renderer.render(scene,camera);
+
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+}
+main2();
 */
 
+function main() {
+  const canvas = document.querySelector('#c_copy');
+  const renderer = new THREE.WebGLRenderer({canvas});
 
+  const fov = 40;
+  const aspect = 2;  // the canvas default
+  const near = 0.1;
+  const far = 1000;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0, 50, 0);
+  camera.up.set(0, 0, 1);
+  camera.lookAt(0, 0, 0);
 
+  const scene = new THREE.Scene();
 
+  {
+    const color = 0xFFFFFF;
+    const intensity = 3;
+    const light = new THREE.PointLight(color, intensity);
+    scene.add(light);
+  }
 
+  const objects = [];
 
+  const radius = 1;
+  const widthSegments = 6;
+  const heightSegments = 6;
+  const sphereGeometry = new THREE.SphereBufferGeometry(
+      radius, widthSegments, heightSegments);
+
+  const solarSystem = new THREE.Object3D();
+  scene.add(solarSystem);
+  objects.push(solarSystem);
+
+  const sunMaterial = new THREE.MeshPhongMaterial({emissive: 0xFFFF00});
+  const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
+  sunMesh.scale.set(5, 5, 5);
+  solarSystem.add(sunMesh);
+  objects.push(sunMesh);
+
+  const earthOrbit = new THREE.Object3D();
+  earthOrbit.position.x = 10;
+  solarSystem.add(earthOrbit);
+  objects.push(earthOrbit);
+
+  const earthMaterial = new THREE.MeshPhongMaterial({color: 0x2233FF, emissive: 0x112244});
+  const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+  earthOrbit.add(earthMesh);
+  objects.push(earthMesh);
+
+  const moonOrbit = new THREE.Object3D();
+  moonOrbit.position.x = 2;
+  earthOrbit.add(moonOrbit);
+
+  const moonMaterial = new THREE.MeshPhongMaterial({color: 0x888888, emissive: 0x222222});
+  const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+  moonMesh.scale.set(.5, .5, .5);
+  moonOrbit.add(moonMesh);
+  objects.push(moonMesh);
+
+  // add an AxesHelper to each node
+  objects.forEach((node) => {
+    const axes = new THREE.AxesHelper();
+    axes.material.depthTest = false;
+    axes.renderOrder = 1;
+    node.add(axes);
+  });
+
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+    return needResize;
+  }
+
+  function render(time) {
+    time *= 0.001;
+
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    objects.forEach((obj) => {
+      obj.rotation.y = time;
+    });
+
+    renderer.render(scene, camera);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+}
+
+main();
