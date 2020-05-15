@@ -31,7 +31,7 @@ class Geo {
 
       //MESH: rotation,position,scale
       f.mesh.forEach(function(mesh,i){
-        mesh.rotation.y=time/2;
+        mesh.rotation.y=time/4;
         // mesh.rotation.x=time*(i-0.5);
       });
 
@@ -77,8 +77,9 @@ class Geo {
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
-    this.camera.position.y=50;
-    this.camera.up.set(0,0,1);
+    this.camera.position.set(0,33,30);
+    // this.camera.position.set(0,33,0);
+    // this.camera.up.set(0,0,1);
     this.camera.lookAt(0,0,0);
   }
 
@@ -95,26 +96,50 @@ class Geo {
 
     this.mesh=[];
 
-    this.mesh.push(this.createSphere(0xeeee00,5));
+    //solarSystem
+    let solarSystem=new THREE.Object3D();
+    this.mesh.push(solarSystem);
+
+    let sun=this.createSphere(0xeeee00,5);
+    solarSystem.add(sun);
+    this.mesh.push(sun);
+
+    //earthOrbit
+    let earthOrbit=new THREE.Object3D();
+    
+    earthOrbit.position.x=20;
+    solarSystem.add(earthOrbit);
+    this.mesh.push(earthOrbit);
+
+    let earth=this.createSphere('midnightblue');
+    earthOrbit.add(earth);
+    this.mesh.push(earth);
+
+    let moon=this.createSphere('dimgray',0.3);
+    moon.position.x=2;
+    earthOrbit.add(moon);
+    this.mesh.push(moon);
 
     //最后我们将mesh添加到场景中。
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
-
-      let axes=new THREE.AxesHelper(3);
-      // axes.material.depthTest=false;
-      mesh.add(axes);
-
-      if(i===0){
-        let grid=new THREE.GridHelper(3,30);
+      if(mesh.type==='Mesh'){
+        //Mesh,Object3D
+        let axes=new THREE.AxesHelper(3);
+        // axes.material.depthTest=false;
+        mesh.add(axes);
+      }else{
+        let grid=new THREE.GridHelper(10,10);
         mesh.add(grid);
       }
 
-      f.scene.add(mesh);
+      
+
     });
+    f.scene.add(solarSystem);
   }
   createSphere(color=0xec4783,scale=1){
-    let geometry=new THREE.SphereGeometry(1,100,100);
+    let geometry=new THREE.SphereGeometry(1,50,50);
     // let geometry=new THREE.WireframeGeometry(box_geometry);
     let material=new THREE.MeshPhongMaterial({
       emissive:color
@@ -126,7 +151,7 @@ class Geo {
 
   //灯光
   createLight(){
-    let intensity=2;
+    let intensity=0.6;
     this.light=new THREE.PointLight(0xffffff,intensity);
     // this.light.position.set(-1,2,400);
 
