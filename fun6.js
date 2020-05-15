@@ -21,28 +21,57 @@ class Fun6 {
     var renderer=new THREE.WebGLRenderer({
       canvas:this.canvas
     });
+
+
+
     
     //raf
     var rafCallback=function(time){
       time=time/1000;
 
+      //MESH: rotation,position,scale
       f.mesh.forEach(function(mesh,i){
         mesh.rotation.y=time/2;
         mesh.rotation.x=time*(i-0.5);
       });
 
       
+      
+      //camera aspect
+      if(f.resizeRenderer2DisplaySize(renderer)){
+        // console.log(f.camera.aspect);
+        f.camera.aspect=f.canvas.clientWidth/f.canvas.clientHeight;
+        f.camera.updateProjectionMatrix();
+      }
 
       renderer.render(f.scene,f.camera);
+
       window.requestAnimationFrame(rafCallback);
     };
     window.requestAnimationFrame(rafCallback);
   }
 
+  //set canvas drawingbuffer
+  resizeRenderer2DisplaySize(renderer){
+    var needResize=true;
+    var targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
+    var targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
+
+    if(targetWidth===this.canvas.width && targetHeight===this.canvas.height){
+      needResize=false;
+    }
+
+    if(needResize){
+      renderer.setSize(targetWidth,targetHeight,false);
+    }
+
+    return (needResize);
+  }
+
   //相机
   createAcamera(){
     var fov=75;
-    var aspect=9/8; //canvas width / height
+    var aspect=2; //默认是2
     var near=0.1;
     var far=10;
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
@@ -73,6 +102,7 @@ class Fun6 {
       mesh.position.x=2*(i-1);
 
       var axes=new THREE.AxesHelper();
+      // axes.material.depthTest=false;
       mesh.add(axes);
 
       if(i===1){

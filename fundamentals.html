@@ -4,17 +4,24 @@
   <title>https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html</title>
   <meta charset="UTF-8">
   <style>
-  body {
+  html,body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  #thecanvas{
+    display: block;
+    width: 100%;
+    height: 90%;
   }
   </style>
 </head>
 <body>
   <canvas 
-    height="800" 
     id="thecanvas"
-    width="900" 
-    ></canvas>
+    >
+      canvas的display默认为 inline
+    </canvas>
   <script 
     src="./fun6.js"
     type="module" 
