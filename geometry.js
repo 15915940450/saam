@@ -17,8 +17,8 @@ class Geo {
 
   //===渲染
   render(){
-    var f=this;
-    var renderer=new THREE.WebGLRenderer({
+    let f=this;
+    let renderer=new THREE.WebGLRenderer({
       canvas:this.canvas
     });
 
@@ -26,7 +26,7 @@ class Geo {
 
     
     //raf
-    var rafCallback=function(time){
+    let rafCallback=function(time){
       time=time/1000;
 
       //MESH: rotation,position,scale
@@ -53,9 +53,9 @@ class Geo {
 
   //set canvas drawingbuffer
   resizeRenderer2DisplaySize(renderer){
-    var needResize=true;
-    var targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
-    var targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
+    let needResize=true;
+    let targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
+    let targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
 
     if(targetWidth===this.canvas.width && targetHeight===this.canvas.height){
       needResize=false;
@@ -70,14 +70,16 @@ class Geo {
 
   //相机
   createAcamera(){
-    var fov=75;
-    var aspect=2; //默认是2
-    var near=0.1;
-    var far=10;
+    let fov=75;
+    let aspect=2; //默认是2
+    let near=0.1;
+    let far=1000;
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
-    this.camera.position.z=5;
+    this.camera.position.y=50;
+    this.camera.up.set(0,0,1);
+    this.camera.lookAt(0,0,0);
   }
 
   //场景
@@ -89,42 +91,44 @@ class Geo {
 
   //物件
   mesh(){
-    var f=this;
+    let f=this;
 
     this.mesh=[];
 
-    this.mesh.push(this.createAmesh());
+    this.mesh.push(this.createSphere(0xeeee00,5));
 
     //最后我们将mesh添加到场景中。
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
 
-      var axes=new THREE.AxesHelper(3);
+      let axes=new THREE.AxesHelper(3);
       // axes.material.depthTest=false;
       mesh.add(axes);
 
       if(i===0){
-        var grid=new THREE.GridHelper(3,30);
+        let grid=new THREE.GridHelper(3,30);
         mesh.add(grid);
       }
 
       f.scene.add(mesh);
     });
   }
-  createAmesh(color=0xec4783){
-    var geometry=new THREE.BoxGeometry(1,1,1);
-    var material=new THREE.MeshPhongMaterial({
-      color:color
+  createSphere(color=0xec4783,scale=1){
+    let geometry=new THREE.SphereGeometry(1,100,100);
+    // let geometry=new THREE.WireframeGeometry(box_geometry);
+    let material=new THREE.MeshPhongMaterial({
+      emissive:color
     });
-    var mesh=new THREE.Mesh(geometry,material);
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
     return (mesh);
   }
 
   //灯光
   createLight(){
-    var intensity=2;
-    this.light=new THREE.DirectionalLight(0xffffff,intensity);
-    this.light.position.set(-1,2,4);
+    let intensity=2;
+    this.light=new THREE.PointLight(0xffffff,intensity);
+    // this.light.position.set(-1,2,400);
 
     this.scene.add(this.light);
   }
