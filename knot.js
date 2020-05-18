@@ -75,7 +75,7 @@ class Pang {
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
-    this.camera.position.set(0,30,0);
+    this.camera.position.set(0,40,100);
     // this.camera.up.set(0,0,1);
     this.camera.lookAt(0,0,0);
   }
@@ -93,24 +93,24 @@ class Pang {
 
     this.mesh=[];
 
-    //solarSystem
-    let solarSystem=new THREE.Object3D();
-    this.mesh.push(solarSystem);
+    //root
+    let root=new THREE.Object3D();
+    this.mesh.push(root);
 
-    let sun=this.createSphere(0xeeee00,5);
-    solarSystem.add(sun);
-    this.mesh.push(sun);
+    let knot=this.createSphere(0xeeee00,5);
+    root.add(knot);
+    this.mesh.push(knot);
 
     
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
       if(mesh.type==='Mesh'){
         //Mesh,Object3D
-        let axes=new THREE.AxesHelper(3);
+        let axes=new THREE.AxesHelper(30);
         // axes.material.depthTest=false;
         mesh.add(axes);
       }else{
-        let grid=new THREE.GridHelper(10,10);
+        let grid=new THREE.GridHelper(100,100);
         mesh.add(grid);
       }
 
@@ -121,10 +121,16 @@ class Pang {
     f.scene.add(f.mesh[0]);
   }
   createSphere(color=0xec4783,scale=1){
-    let geometry=new THREE.SphereGeometry(1,50,50);
-    // let geometry=new THREE.WireframeGeometry(box_geometry);
+    const radius=6;
+    const tubeRadius=1.4;
+    const radialSegments=50;
+    const tubularSegments=50;
+    const p=2;
+    const q=3;
+    const geometry=new THREE.TorusKnotBufferGeometry(radius,tubeRadius,tubularSegments,radialSegments,p,q);
+    // let geometry=new THREE.EdgesGeometry(knot_geometry);
     let material=new THREE.MeshPhongMaterial({
-      emissive:color
+      color:color
     });
     let mesh=new THREE.Mesh(geometry,material);
     mesh.scale.set(scale,scale,scale);
