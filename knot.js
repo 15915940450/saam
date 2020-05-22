@@ -132,8 +132,18 @@ class Ten {
 
     let materials=[];
     for(let i=0;i<6;i++){
+      var texture=loader.load(`./resources/images/flower-${i+1}.jpg`);
+      // console.log(texture);
+      // texture.offset.set(0.2,.2);
+      texture.wrapS=THREE.RepeatWrapping;
+      texture.wrapT=THREE.RepeatWrapping;
+      // texture.center.set(.5,.5);
+      // texture.rotation=Math.PI/4;
+      texture.repeat.set(3,2);
+      console.log(THREE.MathUtils);
+      // texture.rotation=THREE.MathUtils.degToRad(45);
       let material=new THREE.MeshPhongMaterial({
-        map:loader.load(`./resources/images/flower-${i+1}.jpg`)
+        map:texture
       });
       materials.push(material);
     }
