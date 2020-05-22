@@ -102,9 +102,9 @@ class Light {
     let rootObject3D=new THREE.Object3D();
     this.mesh.push(rootObject3D);
 
-    let sun=this.createSphere(0xeeee00);
-    rootObject3D.add(sun);
-    this.mesh.push(sun);
+    let plane=this.createPlane();
+    rootObject3D.add(plane);
+    this.mesh.push(plane);
 
     
     this.mesh.forEach(function(mesh,i){
@@ -128,17 +128,31 @@ class Light {
   //MESH: rotation,position,scale
   operateMeshInRender(timeSec){
     this.mesh.forEach(function(mesh,i){
-      mesh.rotation.y=timeSec/2;
+      // mesh.rotation.y=timeSec/2;
     });
   }
-  createSphere(color=0xec4783,scale=1){
-    let geometry=new THREE.SphereGeometry(1,50,50);
+  createPlane(color='floralwhite',scale=1){
+    let width=40;
+    let height=40;
+    let geometry=new THREE.PlaneGeometry(width,height);
     // let geometry=new THREE.WireframeGeometry(box_geometry);
+
+
+    let loader=new THREE.TextureLoader();
+    let texture=loader.load('./resources/images/checker2_2.png');
+    console.log(texture);
+    texture.wrapS=THREE.RepeatWrapping;
+    texture.wrapT=THREE.RepeatWrapping;
+    texture.magFilter=THREE.NearestFilter;
+    let repeats=width/2;
+    texture.repeat.set(repeats,repeats);
     let material=new THREE.MeshPhongMaterial({
-      emissive:color
+      map:texture,
+      side:THREE.DoubleSide
     });
     let mesh=new THREE.Mesh(geometry,material);
     mesh.scale.set(scale,scale,scale);
+    mesh.rotation.x=-Math.PI/2;
     return (mesh);
   }
 
@@ -146,7 +160,7 @@ class Light {
   addLight(){
     let intensity=0.6;
     this.light=new THREE.PointLight(0xffffff,intensity);
-    this.light.position.set(-1,2,400);
+    this.light.position.set(-1,2,40);
 
     this.scene.add(this.light);
   }
