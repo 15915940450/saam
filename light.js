@@ -2,118 +2,160 @@ import * as THREE from './__three.js-master/build/three.module.js';
 import {OrbitControls} from './__three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GUI} from './__three.js-master/examples/jsm/libs/dat.gui.module.js';
 
-function main() {
-  const canvas = document.querySelector('#thecanvas');
-  const renderer = new THREE.WebGLRenderer({canvas});
+class Light {
+  constructor(){
+    this.canvas=document.querySelector('#thecanvas');
+  }
+  init(){
+    this.createAcamera();
+    this.createControls();
+    this.createScene();
+    this.addMesh();
+    this.addLight();
 
-  const fov = 45;
-  const aspect = 2;  // the canvas default
-  const near = 0.1;
-  const far = 100;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 10, 20);
+    this.render();
+    // console.log(this);
+  }
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 5, 0);
-  controls.update();
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color('black');
-
-  {
-    const planeSize = 40;
-
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize / 2;
-    texture.repeat.set(repeats, repeats);
-
-    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-    const planeMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
+  //===渲染
+  render(){
+    let f=this;
+    let renderer=new THREE.WebGLRenderer({
+      canvas:this.canvas
     });
-    const mesh = new THREE.Mesh(planeGeo, planeMat);
-    mesh.rotation.x = Math.PI * -.5;
-    scene.add(mesh);
-  }
-  {
-    const cubeSize = 4;
-    const cubeGeo = new THREE.BoxBufferGeometry(cubeSize, cubeSize, cubeSize);
-    const cubeMat = new THREE.MeshPhongMaterial({color: '#8AC'});
-    const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-    mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
-    scene.add(mesh);
-  }
-  {
-    const sphereRadius = 3;
-    const sphereWidthDivisions = 32;
-    const sphereHeightDivisions = 16;
-    const sphereGeo = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
-    const sphereMat = new THREE.MeshPhongMaterial({color: '#CA8'});
-    const mesh = new THREE.Mesh(sphereGeo, sphereMat);
-    mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
-    scene.add(mesh);
-  }
 
-  class ColorGUIHelper {
-    constructor(object, prop) {
-      this.object = object;
-      this.prop = prop;
-    }
-    get value() {
-      return `#${this.object[this.prop].getHexString()}`;
-    }
-    set value(hexString) {
-      this.object[this.prop].set(hexString);
-    }
+
+
+    
+    //raf
+    let rafCallback=function(time){
+      time=time/1000;
+
+      //操作物件得以渲染出变化(运动)
+      f.operateMeshInRender(time);
+      
+      
+      //camera aspect
+      if(f.resizeRenderer2DisplaySize(renderer)){
+        f.camera.aspect=f.canvas.clientWidth/f.canvas.clientHeight;
+        f.camera.updateProjectionMatrix();
+      }
+
+      renderer.render(f.scene,f.camera);
+
+      window.requestAnimationFrame(rafCallback);
+    };
+    window.requestAnimationFrame(rafCallback);
   }
 
-  {
-    const color = 0xFFFFFF;
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(0, 10, 0);
-    light.target.position.set(-5, 0, 0);
-    scene.add(light);
-    scene.add(light.target);
+  //set canvas drawingbuffer
+  resizeRenderer2DisplaySize(renderer){
+    let needResize=true;
+    let targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
+    let targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
 
-    const gui = new GUI();
-    gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-    gui.add(light, 'intensity', 0, 2, 0.01);
-    gui.add(light.target.position, 'x', -10, 10, .01);
-    gui.add(light.target.position, 'z', -10, 10, .01);
-    gui.add(light.target.position, 'y', 0, 10, .01);
-  }
-
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-    }
-    return needResize;
-  }
-
-  function render() {
-
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      camera.updateProjectionMatrix();
+    if(targetWidth===this.canvas.width && targetHeight===this.canvas.height){
+      needResize=false;
     }
 
-    renderer.render(scene, camera);
+    if(needResize){
+      renderer.setSize(targetWidth,targetHeight,false);
+    }
 
-    requestAnimationFrame(render);
+    return (needResize);
   }
 
-  requestAnimationFrame(render);
+  //相机
+  createAcamera(){
+    let fov=45;
+    let aspect=2; //默认是2
+    let near=0.1;
+    let far=100;
+    //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
+    this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
+
+    this.camera.position.set(0,10,20);
+    // this.camera.up.set(0,0,1);
+    // this.camera.lookAt(0,0,0);
+  }
+  //环绕控制
+  createControls(){
+    this.controls=new OrbitControls(this.camera,this.canvas);
+    this.controls.target.set(0,4,0);
+    this.controls.update();
+  }
+
+  //场景
+  createScene(){
+    this.scene=new THREE.Scene();
+    this.scene.background=new THREE.Color(0x333333);
+  }
+
+
+  //物件
+  addMesh(){
+    let f=this;
+
+    this.mesh=[];
+
+    //rootObject3D
+    let rootObject3D=new THREE.Object3D();
+    this.mesh.push(rootObject3D);
+
+    let sun=this.createSphere(0xeeee00);
+    rootObject3D.add(sun);
+    this.mesh.push(sun);
+
+    
+    this.mesh.forEach(function(mesh,i){
+      // console.log(mesh);
+      if(mesh.type==='Mesh'){
+        //Mesh,Object3D
+        let axes=new THREE.AxesHelper(3);
+        // axes.material.depthTest=false;
+        mesh.add(axes);
+      }else{
+        let grid=new THREE.GridHelper(10,10);
+        mesh.add(grid);
+      }
+
+      
+
+    });
+    //最后我们将root添加到场景中。
+    f.scene.add(f.mesh[0]);
+  }
+  //MESH: rotation,position,scale
+  operateMeshInRender(timeSec){
+    this.mesh.forEach(function(mesh,i){
+      mesh.rotation.y=timeSec/2;
+    });
+  }
+  createSphere(color=0xec4783,scale=1){
+    let geometry=new THREE.SphereGeometry(1,50,50);
+    // let geometry=new THREE.WireframeGeometry(box_geometry);
+    let material=new THREE.MeshPhongMaterial({
+      emissive:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    return (mesh);
+  }
+
+  //灯光
+  addLight(){
+    let intensity=0.6;
+    this.light=new THREE.PointLight(0xffffff,intensity);
+    this.light.position.set(-1,2,400);
+
+    this.scene.add(this.light);
+  }
+
+
+
 }
 
-main();
+
+window.obj=new Light();
+window.obj.init();
+
