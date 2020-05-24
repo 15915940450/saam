@@ -112,6 +112,10 @@ class Light {
     rootObject3D.add(cube);
     this.mesh.push(cube);
 
+    let sphere=this.createSphere();
+    rootObject3D.add(sphere);
+    this.mesh.push(sphere);
+
     
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
@@ -155,6 +159,7 @@ class Light {
       map:texture,
       side:THREE.DoubleSide
     });
+
     let mesh=new THREE.Mesh(geometry,material);
     mesh.rotation.x=-Math.PI/2;
     return (mesh);
@@ -168,12 +173,25 @@ class Light {
     let mesh=new THREE.Mesh(geometry,material);
     mesh.scale.set(scale,scale,scale);
     mesh.position.set(width+1,width/2,0);
+    // mesh.rotation.y=-.4;
+    return (mesh);
+  }
+  createSphere(color='crimson',scale=1){
+    let radius=3;
+    let geometry=new THREE.SphereGeometry(radius,50,50);
+    let material=new THREE.MeshPhongMaterial({
+      // flatShading:true,
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(-radius-1,radius+2,0);
     return (mesh);
   }
 
   //灯光
   addLight(){
-    let intensity=.8;
+    let intensity=.951;
     this.light=new THREE.PointLight(0xffffff,intensity);
     this.light.position.set(-4,15,9);
 
