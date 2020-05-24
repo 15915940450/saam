@@ -108,6 +108,10 @@ class Light {
     rootObject3D.add(plane);
     this.mesh.push(plane);
 
+    let cube=this.createCube();
+    rootObject3D.add(cube);
+    this.mesh.push(cube);
+
     
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
@@ -133,7 +137,7 @@ class Light {
       // mesh.rotation.y=timeSec/2;
     });
   }
-  createPlane(color='floralwhite',scale=1){
+  createPlane(){
     let width=30;
     let geometry=new THREE.PlaneGeometry(width,width);
     // let geometry=new THREE.WireframeGeometry(box_geometry);
@@ -152,8 +156,18 @@ class Light {
       side:THREE.DoubleSide
     });
     let mesh=new THREE.Mesh(geometry,material);
-    mesh.scale.set(scale,scale,scale);
     mesh.rotation.x=-Math.PI/2;
+    return (mesh);
+  }
+  createCube(color='floralwhite',scale=1){
+    let width=4;
+    let geometry=new THREE.BoxGeometry(width,width,width);
+    let material=new THREE.MeshPhongMaterial({
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(width+1,width/2,0);
     return (mesh);
   }
 
