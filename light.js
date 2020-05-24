@@ -1,6 +1,8 @@
-import * as THREE from './__three.js-master/build/three.module.js';
-import {OrbitControls} from './__three.js-master/examples/jsm/controls/OrbitControls.js';
-import {GUI} from './__three.js-master/examples/jsm/libs/dat.gui.module.js';
+import * as THREE from './__3/three.module.js';
+import {OrbitControls} from './__3/OrbitControls.js';
+import {GUI} from './__3/dat.gui.module.js';
+
+window.__3=THREE;
 
 class Light {
   constructor(){
@@ -74,7 +76,7 @@ class Light {
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
-    this.camera.position.set(0,10,20);
+    this.camera.position.set(5,10,30);
     // this.camera.up.set(0,0,1);
     // this.camera.lookAt(0,0,0);
   }
@@ -132,15 +134,14 @@ class Light {
     });
   }
   createPlane(color='floralwhite',scale=1){
-    let width=40;
-    let height=40;
-    let geometry=new THREE.PlaneGeometry(width,height);
+    let width=30;
+    let geometry=new THREE.PlaneGeometry(width,width);
     // let geometry=new THREE.WireframeGeometry(box_geometry);
 
 
     let loader=new THREE.TextureLoader();
     let texture=loader.load('./resources/images/checker2_2.png');
-    console.log(texture);
+    // console.log(texture);
     texture.wrapS=THREE.RepeatWrapping;
     texture.wrapT=THREE.RepeatWrapping;
     texture.magFilter=THREE.NearestFilter;
@@ -158,9 +159,9 @@ class Light {
 
   //灯光
   addLight(){
-    let intensity=0.6;
+    let intensity=.8;
     this.light=new THREE.PointLight(0xffffff,intensity);
-    this.light.position.set(-1,2,40);
+    this.light.position.set(-4,15,9);
 
     this.scene.add(this.light);
   }
