@@ -4,7 +4,7 @@ import {GUI} from './__3/dat.gui.module.js';
 
 window.__3=THREE;
 
-class Light {
+class O_xyz {
   constructor(){
     this.canvas=document.querySelector('#thecanvas');
   }
@@ -193,19 +193,18 @@ class Light {
   //灯光
   addLight(){
     let intensity=.951;
-    this.light=new THREE.DirectionalLight(0xffffff,intensity);
-    this.light.position.set(0,10,0);
-    this.light.target.position.set(-5,0,0);
+    this.light=new THREE.PointLight(0xffffff,intensity);
+    this.light.position.set(1,5,9);
+    let lightHelper=new THREE.PointLightHelper(this.light);
 
     this.scene.add(this.light);
-    this.scene.add(this.light.target);
+    this.scene.add(lightHelper);
   }
 
   //gui
   gui(){
     let gui=new GUI();
     gui.add(this.light,'intensity',0,2,0.001);
-    gui.add(this.light.target.position,'x',-10,10,0.1);
   }
 
 
@@ -213,6 +212,6 @@ class Light {
 }
 
 
-window.obj=new Light();
+window.obj=new O_xyz();
 window.obj.init();
 
