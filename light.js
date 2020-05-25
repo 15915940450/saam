@@ -14,6 +14,7 @@ class Light {
     this.createScene();
     this.addMesh();
     this.addLight();
+    this.gui();
 
     this.render();
     // console.log(this);
@@ -116,7 +117,7 @@ class Light {
     rootObject3D.add(sphere);
     this.mesh.push(sphere);
 
-    
+    //添加辅助axes,grid
     this.mesh.forEach(function(mesh,i){
       // console.log(mesh);
       if(mesh.type==='Mesh'){
@@ -192,10 +193,18 @@ class Light {
   //灯光
   addLight(){
     let intensity=.951;
-    this.light=new THREE.PointLight(0xffffff,intensity);
-    this.light.position.set(-4,15,9);
+    this.light=new THREE.DirectionalLight(0xffffff,intensity);
+    this.light.position.set(0,10,0);
+    this.light.target.position.set(-5,0,0);
 
     this.scene.add(this.light);
+    this.scene.add(this.light.target);
+  }
+
+  //gui
+  gui(){
+    let gui=new GUI();
+    gui.add(this.light,'intensity',0,2,0.001);
   }
 
 
