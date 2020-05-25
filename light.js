@@ -27,7 +27,8 @@ class O_xyz {
       canvas:this.canvas
     });
 
-
+    //The first thing we need to do is turn on shadows in the renderer.
+    renderer.shadowMap.enabled=true;
 
     
     //raf
@@ -142,6 +143,7 @@ class O_xyz {
       // mesh.rotation.y=timeSec/2;
     });
   }
+  //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
   createPlane(){
     let width=30;
     let geometry=new THREE.PlaneGeometry(width,width);
@@ -163,6 +165,7 @@ class O_xyz {
 
     let mesh=new THREE.Mesh(geometry,material);
     mesh.rotation.x=-Math.PI/2;
+    mesh.receiveShadow=true;
     return (mesh);
   }
   createCube(color='floralwhite',scale=1){
@@ -175,6 +178,8 @@ class O_xyz {
     mesh.scale.set(scale,scale,scale);
     mesh.position.set(width+1,width/2,0);
     // mesh.rotation.y=-.4;
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
     return (mesh);
   }
   createSphere(color='crimson',scale=1){
@@ -187,6 +192,8 @@ class O_xyz {
     let mesh=new THREE.Mesh(geometry,material);
     mesh.scale.set(scale,scale,scale);
     mesh.position.set(-radius-1,radius+2,0);
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
     return (mesh);
   }
 
@@ -195,6 +202,8 @@ class O_xyz {
     let intensity=.951;
     this.light=new THREE.PointLight(0xffffff,intensity);
     this.light.position.set(1,5,9);
+    //Then we also need to tell the light to cast a shadow
+    this.light.castShadow=true;
     let lightHelper=new THREE.PointLightHelper(this.light);
 
     this.scene.add(this.light);
@@ -214,4 +223,5 @@ class O_xyz {
 
 window.obj=new O_xyz();
 window.obj.init();
+
 
