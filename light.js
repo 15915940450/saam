@@ -205,6 +205,7 @@ class Light {
   gui(){
     let gui=new GUI();
     gui.add(this.light,'intensity',0,2,0.001);
+    gui.add(this.light.target.position,'x',-10,10,0.1);
   }
 
 
