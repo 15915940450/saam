@@ -5,19 +5,15 @@
 /*
 let Amn=[];
 let Bnp=[];
+let Cpq=[];
 */
 
-let Amn=['-14,-10,6','-1,-5,-14'];
-let Bnp=['15','0','-14'];
+let Amn=[[1,0,2],[-1,3,1]];
+let Bnp=[[3,1],[2,1],[1,0]];
+let Cpq=[[1,2,3,4,5],[5,6,7,8,1]];
 
-let multiply=function(Amn,Bnp){
+let multiplyAB=function(Amn,Bnp){
   let AmnBnp=[],i,j,k;
-  Amn=Amn.map(function(v){
-    return (v.split(','));
-  });
-  Bnp=Bnp.map(function(v){
-    return (v.split(','));
-  });
   // 求出m,n,p
   const m=Amn.length;
   const n=Amn[0].length;
@@ -49,6 +45,15 @@ let multiply=function(Amn,Bnp){
 
   return (AmnBnp);
 };
-//AmnBnp===Cmp
-let AmnBnp=multiply(Amn,Bnp);  //ˈmʌltɪplaɪ
-console.log(AmnBnp);
+let multiply=function(...param){
+  var result=[];
+  for(var i=0;i<param.length-1;i++){
+    result=multiplyAB(param[i],param[i+1]);
+    param[i+1]=result;
+  }
+  
+  return result;
+};
+let result=multiply(Amn,Bnp,Cpq);  //ˈmʌltɪplaɪ
+console.log(result);
+
