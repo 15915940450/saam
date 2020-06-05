@@ -93,9 +93,9 @@ class DETerminant{
     for(i=0;i<n;i++){
       arr.push(i);
     }
-    this.FullPermutation=this.permute(arr).map(function(v){
+    this.FullPermutation=this.getArrSFullPermutation(arr).map(function(v){
       return ({
-        tau:f.InversePairs(v),  //逆序数
+        tau:f.calcTauByMERGE_SORT(v).tau,  //逆序数
         permutation:v   //是0,1,2，...，n-1的一个排列
       });
     }).map(function(v){
@@ -130,42 +130,73 @@ class DETerminant{
       this.result+=this.FullPermutation[i].hong;
     }
   }
-  //求一个数组的逆序数
-  InversePairs(arr = []) {
-    //避免无意间修改了arr参数
-    let data=arr.slice();
-    // write code here
-    let len = data.length
-    if (len === 0) return 0
-    const copy = data.concat([])
-    let count = InversePairsHelp(data, copy, 0, len - 1)
-    return count
-    function InversePairsHelp(data, copy, start, end) {
-      if (start === end) {
-        copy[start] = data[start]
-        return 0
-      }
-      let mid = Math.floor((end - start) / 2)
-      let left = InversePairsHelp(copy, data, start, start + mid)
-      let right = InversePairsHelp(copy, data, start + mid + 1, end)
-      let i = start + mid
-      let j = end
-      let count = 0
-      let indexCopy = end
-      while (i >= start && j >= start + mid + 1) {
-        if (data[i] > data[j]) {
-          copy[indexCopy--] = data[i--]
-          count = count + j - start - mid
-        } else {
-          copy[indexCopy--] = data[j--]
+  //求一个数组的逆序数(归并排序)
+  /*
+  https://www.jianshu.com/p/33cffa1ce613
+  https://www.bilibili.com/video/BV1Ax411U7Xx?from=search&seid=9095028233196157434
+  */
+  calcTauByMERGE_SORT(arrNeedToSort=[]){
+    var tau=0;
+    var MERGE=function(arrSortedLeft,arrSortedRight){
+      var arrSorted=[],tau=0;
+      var h=0,f=0,g=0;
+      
+      while(f<arrSortedLeft.length && g<arrSortedRight.length){
+        if(arrSortedLeft[f]>arrSortedRight[g]){
+          //逆序
+          tau+=arrSortedLeft.length-f;
+          arrSorted[h]=arrSortedRight[g];
+          h++;
+          g++;
+        }else{
+          arrSorted[h]=arrSortedLeft[f];
+          h++;
+          f++;
         }
       }
-      for (; i >= start; i--)
-        copy[indexCopy--] = data[i]
-      for (; j >= start + mid + 1; j--)
-        copy[indexCopy--] = data[j]
-      return left + right + count
-    }
+
+      while(f<arrSortedLeft.length){
+        arrSorted[h]=arrSortedLeft[f];
+        h++;
+        f++;
+      }
+
+      while(g<arrSortedRight.length){
+        arrSorted[h]=arrSortedRight[g];
+        h++;
+        g++;
+      }
+
+      return {
+        arrSorted:arrSorted,
+        tau:tau
+      };
+    };
+    var MERGE_SORT=function(arrNeedToSort){
+      var arrLeft,arrRight,arrSorted;
+      if(arrNeedToSort.length<=1){
+        return (arrNeedToSort);
+      }
+
+
+      var Mr=arrNeedToSort.length/2;
+      arrLeft=arrNeedToSort.slice(0,Mr);
+      arrRight=arrNeedToSort.slice(Mr);
+
+
+      var arrSortedLeft=MERGE_SORT(arrLeft);
+      var arrSortedRight=MERGE_SORT(arrRight);
+      var obj=MERGE(arrSortedLeft,arrSortedRight);
+      // console.log(obj);
+      tau+=obj.tau;
+      arrSorted=obj.arrSorted;
+      return arrSorted;
+    };
+
+    return ({
+      arrSorted:MERGE_SORT(arrNeedToSort),
+      tau:tau
+    });
   }
   // 阶乘
   factorial(n){
@@ -174,11 +205,12 @@ class DETerminant{
     }
     return (n*this.factorial(n-1));
   }
-  //数组的全排列
-  permute(arr){
+  //数组的全排列..
+  getArrSFullPermutation(arr){
     var result=[];
     var usedChars=[];
-    var main=function(arr){
+
+    var main=function(){
       var i,ch;
       for(i=0;i<arr.length;i++){
         ch=arr.splice(i,1)[0];
@@ -186,84 +218,18 @@ class DETerminant{
         if(!arr.length){
           result.push(usedChars.slice());
         }
-        main(arr);
+
+        main();
+
         arr.splice(i,0,ch);
         usedChars.pop();
       }
-      return result;
     };
-    result=main(arr);
+    main();
 
     return result;
   }
-}   //class
+}//class
 
 var det=new DETerminant();
 det.init();
-// https://www.jianshu.com/p/33cffa1ce613 简书 [图解] 归并排序
-
-// console.log('逆序数',det.InversePairs([5,4,7,9,3,8,2,1]));
-
-
-//https://www.bilibili.com/video/BV1Ax411U7Xx?from=search&seid=9095028233196157434
-
-var MERGE=function(arrSortedLeft,arrSortedRight){
-  var arrSorted=[],tau=0;
-  var h=0,f=0,g=0;
-  
-  while(f<arrSortedLeft.length && g<arrSortedRight.length){
-    if(arrSortedLeft[f]>arrSortedRight[g]){
-      //逆序
-      tau+=arrSortedLeft.length-f;
-      arrSorted[h]=arrSortedRight[g];
-      h++;
-      g++;
-    }else{
-      arrSorted[h]=arrSortedLeft[f];
-      h++;
-      f++;
-    }
-  }
-
-  while(f<arrSortedLeft.length){
-    arrSorted[h]=arrSortedLeft[f];
-    h++;
-    f++;
-  }
-
-  while(g<arrSortedRight.length){
-    arrSorted[h]=arrSortedRight[g];
-    h++;
-    g++;
-  }
-
-  return {
-    arrSorted:arrSorted,
-    tau:tau
-  };
-};
-var arrNeedToSort=[5,4,7,9,3,8,2];
-console.log('逆序数',det.InversePairs(arrNeedToSort));
-
-var MERGE_SORT=function(arrNeedToSort){
-  var arrLeft,arrRight,arrSorted;
-  if(arrNeedToSort.length===1){
-    return (arrNeedToSort);
-  }
-
-
-  var Mr=arrNeedToSort.length/2;
-  arrLeft=arrNeedToSort.slice(0,Mr);
-  arrRight=arrNeedToSort.slice(Mr);
-
-
-  var arrSortedLeft=MERGE_SORT(arrLeft);
-  var arrSortedRight=MERGE_SORT(arrRight);
-  var obj=MERGE(arrSortedLeft,arrSortedRight);
-  console.log(obj);
-  arrSorted=obj.arrSorted;
-  return arrSorted;
-};
-var arrSorted=MERGE_SORT(arrNeedToSort);
-console.log(arrSorted);
-
