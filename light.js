@@ -1,235 +1,225 @@
-/*
-功能1：计算多个矩阵乘积
-功能2：求n阶行列式
-*/
+import * as THREE from './__3/three.module.js';
+import {OrbitControls} from './__3/OrbitControls.js';
+import {GUI} from './__3/dat.gui.module.js';
 
-class Matrix {
-  /*
-  矩阵 matrix Amn m*n m行n列
-  当矩阵A的列数（column）等于矩阵B的行数（row）时，A与B可以相乘。
-  */
+window.__3=THREE;
+
+class O_xyz {
   constructor(){
-    this.Amn=[[1,0,2],[-1,3,1]];
-    this.Bnp=[[3,1],[2,1],[1,0]];
-    this.Cpq=[[1,2,3,4,5],[5,6,7,8,1]];
+    this.canvas=document.querySelector('#thecanvas');
   }
-
   init(){
-    let result=this.multiply(this.Amn,this.Bnp,this.Cpq);  //ˈmʌltɪplaɪ
-    console.log(JSON.stringify(result));
-    /*
-    [
-      [10,16,22,28,26],
-      [14,20,26,32,22]
-    ]
-    */
+    this.createAcamera();
+    this.createControls();
+    this.createScene();
+    this.addMesh();
+    this.addLight();
+    this.gui();
+
+    this.render();
+    // console.log(this);
   }
 
-  multiplyAB(Amn,Bnp){
-    let AmnBnp=[],i,j,k;
-    // 求出m,n,p
-    const m=Amn.length;
-    const n=Amn[0].length;
-    const n2=Bnp.length;
-    const p=Bnp[0].length;
+  //===渲染
+  render(){
+    let f=this;
+    let renderer=new THREE.WebGLRenderer({
+      canvas:this.canvas
+    });
 
-    //可乘性
-    if(n!==n2){
-      var msg='警告：两个矩阵不可相乘';
-      // console.error(msg);
-      return msg;
-    }
+    //The first thing we need to do is turn on shadows in the renderer.
+    renderer.shadowMap.enabled=true;
 
-    let formula=function(i,j){
-      let Cij=0;
-      for(k=0;k<n;k++){
-        Cij+=Amn[i][k]*Bnp[k][j];
-      }
-      return Cij;
-    };
-
-    for(i=0;i<m;i++){
-      AmnBnp.push([]);
-      for(j=0;j<p;j++){
-        //确定值(公式)
-        AmnBnp[i][j]=formula(i,j);
-      }
-    }
-
-    return (AmnBnp);
-  }
-  multiply(...param){
-    var result=[];
-    for(var i=0;i<param.length-1;i++){
-      result=this.multiplyAB(param[i],param[i+1]);
-      param[i+1]=result;
-    }
     
-    return result;
-  }
-} //class Matrix
+    //raf
+    let rafCallback=function(time){
+      time=time/1000;
 
-var matrix=new Matrix();
-matrix.init();
-
-
-class DETerminant{
-  constructor(){
-    this.D=[
-      [3,2,-1,4],
-      [1,-3/2,5/2,1/2],
-      [1,0,-2,3],
-      [5,4,1,2]
-    ];
-    this.FullPermutation=[];
-    this.result=0;  //等于所有取自不同行不同列的n个元素的乘积的代数和 (-37)
-  }
-  init(){
-    var f=this,i;
-    var n=this.D.length;
-    // n阶行列式是由n! 项组成的。
-    //算出下标J的全排列
-    var arr=[];
-    for(i=0;i<n;i++){
-      arr.push(i);
-    }
-    this.FullPermutation=this.getArrSFullPermutation(arr).map(function(v){
-      return ({
-        tau:f.calcTauByMERGE_SORT(v).tau,  //逆序数
-        permutation:v   //是0,1,2，...，n-1的一个排列
-      });
-    }).map(function(v){
-      var sign=1;
-      /*
-      是偶排列时带有正号,是奇排列时带有负号
-      */
-      // x & 1 === 0为偶数。
-      if(v.tau & 1){
-        //奇数
-        sign=-1;
-      }
-
-      var product=1;  //取自不同行不同列的n个元素的乘积
-      for(i=0;i<n;i++){
-        //j下标来自排列
-        var j=v.permutation[i];
-        //i依次为0,1,2...
-        product*=f.D[i][j];
-      }
-      //公项
-      v.hong=sign*product;
-      return (v);
-    });
-    this.DET();
-
-    console.log(this.result);
-  }
-  DET(){
-    //所有n级排列求和
-    for(var i=0;i<this.FullPermutation.length;i++){
-      this.result+=this.FullPermutation[i].hong;
-    }
-  }
-  //求一个数组的逆序数(归并排序)
-  /*
-  https://www.jianshu.com/p/33cffa1ce613
-  https://www.bilibili.com/video/BV1Ax411U7Xx?from=search&seid=9095028233196157434
-  */
-  calcTauByMERGE_SORT(arrNeedToSort=[]){
-    var tau=0;
-    var MERGE=function(arrSortedLeft,arrSortedRight){
-      var arrSorted=[],tau=0;
-      var h=0,f=0,g=0;
+      //操作物件得以渲染出变化(运动)
+      f.operateMeshInRender(time);
       
-      while(f<arrSortedLeft.length && g<arrSortedRight.length){
-        if(arrSortedLeft[f]>arrSortedRight[g]){
-          //逆序
-          tau+=arrSortedLeft.length-f;
-          arrSorted[h]=arrSortedRight[g];
-          h++;
-          g++;
-        }else{
-          arrSorted[h]=arrSortedLeft[f];
-          h++;
-          f++;
-        }
+      
+      //camera aspect
+      if(f.resizeRenderer2DisplaySize(renderer)){
+        f.camera.aspect=f.canvas.clientWidth/f.canvas.clientHeight;
+        f.camera.updateProjectionMatrix();
       }
 
-      while(f<arrSortedLeft.length){
-        arrSorted[h]=arrSortedLeft[f];
-        h++;
-        f++;
-      }
+      renderer.render(f.scene,f.camera);
 
-      while(g<arrSortedRight.length){
-        arrSorted[h]=arrSortedRight[g];
-        h++;
-        g++;
-      }
-
-      return {
-        arrSorted:arrSorted,
-        tau:tau
-      };
+      window.requestAnimationFrame(rafCallback);
     };
-    var MERGE_SORT=function(arrNeedToSort){
-      var arrLeft,arrRight,arrSorted;
-      if(arrNeedToSort.length<=1){
-        return (arrNeedToSort);
+    window.requestAnimationFrame(rafCallback);
+  }
+
+  //set canvas drawingbuffer
+  resizeRenderer2DisplaySize(renderer){
+    let needResize=true;
+    let targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
+    let targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
+
+    if(targetWidth===this.canvas.width && targetHeight===this.canvas.height){
+      needResize=false;
+    }
+
+    if(needResize){
+      renderer.setSize(targetWidth,targetHeight,false);
+    }
+
+    return (needResize);
+  }
+
+  //相机
+  createAcamera(){
+    let fov=45;
+    let aspect=2; //默认是2
+    let near=0.1;
+    let far=100;
+    //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
+    this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
+
+    this.camera.position.set(5,10,30);
+    // this.camera.up.set(0,0,1);
+    // this.camera.lookAt(0,0,0);
+  }
+  //环绕控制
+  createControls(){
+    this.controls=new OrbitControls(this.camera,this.canvas);
+    this.controls.target.set(0,4,0);
+    this.controls.update();
+  }
+
+  //场景
+  createScene(){
+    this.scene=new THREE.Scene();
+    this.scene.background=new THREE.Color(0x333333);
+  }
+
+
+  //物件
+  addMesh(){
+    let f=this;
+
+    this.mesh=[];
+
+    //rootObject3D
+    let rootObject3D=new THREE.Object3D();
+    this.mesh.push(rootObject3D);
+
+    let plane=this.createPlane();
+    rootObject3D.add(plane);
+    this.mesh.push(plane);
+
+    let cube=this.createCube();
+    rootObject3D.add(cube);
+    this.mesh.push(cube);
+
+    let sphere=this.createSphere();
+    rootObject3D.add(sphere);
+    this.mesh.push(sphere);
+
+    //添加辅助axes,grid
+    this.mesh.forEach(function(mesh,i){
+      // console.log(mesh);
+      if(mesh.type==='Mesh'){
+        //Mesh,Object3D
+        let axes=new THREE.AxesHelper(3);
+        // axes.material.depthTest=false;
+        mesh.add(axes);
+      }else{
+        let grid=new THREE.GridHelper(10,10);
+        mesh.add(grid);
       }
 
+      
 
-      var Mr=arrNeedToSort.length/2;
-      arrLeft=arrNeedToSort.slice(0,Mr);
-      arrRight=arrNeedToSort.slice(Mr);
-
-
-      var arrSortedLeft=MERGE_SORT(arrLeft);
-      var arrSortedRight=MERGE_SORT(arrRight);
-      var obj=MERGE(arrSortedLeft,arrSortedRight);
-      // console.log(obj);
-      tau+=obj.tau;
-      arrSorted=obj.arrSorted;
-      return arrSorted;
-    };
-
-    return ({
-      arrSorted:MERGE_SORT(arrNeedToSort),
-      tau:tau
+    });
+    //最后我们将root添加到场景中。
+    f.scene.add(f.mesh[0]);
+  }
+  //MESH: rotation,position,scale
+  operateMeshInRender(timeSec){
+    this.mesh.forEach(function(mesh,i){
+      // mesh.rotation.y=timeSec/2;
     });
   }
-  // 阶乘
-  factorial(n){
-    if(n===1){
-      return 1;
-    }
-    return (n*this.factorial(n-1));
+  //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
+  createPlane(){
+    let width=30;
+    let geometry=new THREE.PlaneGeometry(width,width);
+    // let geometry=new THREE.WireframeGeometry(box_geometry);
+
+
+    let loader=new THREE.TextureLoader();
+    let texture=loader.load('./resources/images/checker2_2.png');
+    // console.log(texture);
+    texture.wrapS=THREE.RepeatWrapping;
+    texture.wrapT=THREE.RepeatWrapping;
+    texture.magFilter=THREE.NearestFilter;
+    let repeats=width/2;
+    texture.repeat.set(repeats,repeats);
+    let material=new THREE.MeshPhongMaterial({
+      map:texture,
+      side:THREE.DoubleSide
+    });
+
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.rotation.x=-Math.PI/2;
+    mesh.receiveShadow=true;
+    return (mesh);
   }
-  //数组的全排列..
-  getArrSFullPermutation(arr){
-    var result=[];
-    var usedChars=[];
-
-    var main=function(){
-      var i,ch;
-      for(i=0;i<arr.length;i++){
-        ch=arr.splice(i,1)[0];
-        usedChars.push(ch);
-        if(!arr.length){
-          result.push(usedChars.slice());
-        }
-
-        main();
-
-        arr.splice(i,0,ch);
-        usedChars.pop();
-      }
-    };
-    main();
-
-    return result;
+  createCube(color='floralwhite',scale=1){
+    let width=4;
+    let geometry=new THREE.BoxGeometry(width,width,width);
+    let material=new THREE.MeshPhongMaterial({
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(width+1,width/2,0);
+    // mesh.rotation.y=-.4;
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+    return (mesh);
   }
-}//class
+  createSphere(color='crimson',scale=1){
+    let radius=3;
+    let geometry=new THREE.SphereGeometry(radius,50,50);
+    let material=new THREE.MeshPhongMaterial({
+      // flatShading:true,
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(-radius-1,radius+2,0);
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+    return (mesh);
+  }
 
-var det=new DETerminant();
-det.init();
+  //灯光
+  addLight(){
+    let intensity=.951;
+    this.light=new THREE.PointLight(0xffffff,intensity);
+    this.light.position.set(1,5,9);
+    //Then we also need to tell the light to cast a shadow
+    this.light.castShadow=true;
+    let lightHelper=new THREE.PointLightHelper(this.light);
+
+    this.scene.add(this.light);
+    this.scene.add(lightHelper);
+  }
+
+  //gui
+  gui(){
+    let gui=new GUI();
+    gui.add(this.light,'intensity',0,2,0.001);
+  }
+
+
+
+}
+
+
+window.obj=new O_xyz();
+window.obj.init();
