@@ -1,18 +1,24 @@
 import * as THREE from './__3/three.module.js';
 import {OrbitControls} from './__3/OrbitControls.js';
 import {GUI} from './__3/dat.gui.module.js';
+import {OBJLoader2} from './__three.js-master/examples/jsm/loaders/OBJLoader2.js';
+import {MTLLoader} from './__three.js-master/examples/jsm/loaders/MTLLoader.js';
+import {MtlObjBridge} from './__three.js-master/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
 
 window.__3=THREE;
 
 class O_xyz {
   constructor(){
     this.canvas=document.querySelector('#thecanvas');
+    this.mesh=[];
   }
   init(){
     this.createAcamera();
     this.createControls();
     this.createScene();
+    
     this.addMesh();
+    this.loadObj();
     this.addLight();
     this.gui();
 
@@ -100,7 +106,7 @@ class O_xyz {
   addMesh(){
     let f=this;
 
-    this.mesh=[];
+    
 
     //rootObject3D
     let rootObject3D=new THREE.Object3D();
@@ -117,6 +123,7 @@ class O_xyz {
     let sphere=this.createSphere();
     rootObject3D.add(sphere);
     this.mesh.push(sphere);
+
 
     //添加辅助axes,grid
     this.mesh.forEach(function(mesh,i){
@@ -137,10 +144,58 @@ class O_xyz {
     //最后我们将root添加到场景中。
     f.scene.add(f.mesh[0]);
   }
+  //加载材质（.mtl）与OBJ物件（.obj）
+  loadObj(){
+    var f=this;
+    const mtlLoader=new MTLLoader();
+    const objLoader=new OBJLoader2();
+
+    /*
+    //只能load一次...?
+    objLoader.load('./resources/objl_oader2/unsee.obj',function(obj){
+      f.mesh[0].add(obj);
+      obj.name='__unsee';
+
+      //box the windmill
+      var box=new THREE.Box3().setFromObject(obj);
+      var boxSize=box.getSize(new THREE.Vector3()).length();
+      var boxCenter=box.getCenter(new THREE.Vector3());
+
+      console.log(boxSize,boxCenter.y,obj);
+
+      obj.scale.set(1/200,1/200,1/200);
+
+      f.mesh.push(obj);
+    });*/
+
+    mtlLoader.load('./resources/objl_oader2/windmill.mtl',function(mtlParseResult){
+      const materials=MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+      materials.Material.side=THREE.DoubleSide;
+      objLoader.addMaterials(materials);
+      objLoader.load('./resources/objl_oader2/windmill.obj',function(windmillobj){
+        f.mesh[0].add(windmillobj);
+        windmillobj.name='__windmill';
+
+        windmillobj.position.z=-8;
+
+        f.mesh.push(windmillobj);
+
+      });
+
+      
+
+    });
+
+
+  }
   //MESH: rotation,position,scale
   operateMeshInRender(timeSec){
     this.mesh.forEach(function(mesh,i){
       // mesh.rotation.y=timeSec/2;
+      // console.log(mesh.name);
+      if(mesh.name==='__windmill'){//i===4
+        mesh.rotation.y=timeSec/2;
+      }
     });
   }
   //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
@@ -175,6 +230,7 @@ class O_xyz {
       color:color
     });
     let mesh=new THREE.Mesh(geometry,material);
+    mesh.name='方体';
     mesh.scale.set(scale,scale,scale);
     mesh.position.set(width+1,width/2,0);
     // mesh.rotation.y=-.4;
