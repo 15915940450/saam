@@ -72,28 +72,43 @@ class O_xyz {
 
   //相机
   createAcamera(){
-    let fov=45;
+    let fov=75;
     let aspect=2; //默认是2
     let near=0.1;
     let far=100;
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
-    this.camera.position.set(5,10,30);
+    this.camera.position.z=3;
+    this.camera.position.y=2;
     // this.camera.up.set(0,0,1);
     // this.camera.lookAt(0,0,0);
   }
   //环绕控制
   createControls(){
     this.controls=new OrbitControls(this.camera,this.canvas);
-    this.controls.target.set(0,4,0);
+    this.controls.target.set(0,0,0);
     this.controls.update();
   }
 
   //场景
   createScene(){
     this.scene=new THREE.Scene();
-    this.scene.background=new THREE.Color(0x333333);
+
+    let loader=new THREE.CubeTextureLoader();
+    var arrPosNeg=[
+      'pos-x.jpg',
+      'neg-x.jpg',
+      'pos-y.jpg',
+      'neg-y.jpg',
+      'pos-z.jpg',
+      'neg-z.jpg'
+    ].map(function(v){
+      return (`./resources/cubemap/${v}`);
+    });
+    let texture=loader.load(arrPosNeg);
+
+    this.scene.background=texture;
   }
 
 
@@ -118,7 +133,8 @@ class O_xyz {
 
     let sphere=this.createSphere();
     rootObject3D.add(sphere);
-    this.mesh.push(sphere);*/
+    this.mesh.push(sphere);
+    */
 
 
     this.gltfLOAD();
@@ -133,7 +149,7 @@ class O_xyz {
         // axes.material.depthTest=false;
         mesh.add(axes);
       }else{
-        let grid=new THREE.GridHelper(10,10);
+        let grid=new THREE.GridHelper(50,50);
         mesh.add(grid);
       }
 
@@ -144,20 +160,18 @@ class O_xyz {
     f.scene.add(f.mesh[0]);
   }
 
-  gltfLOAD(){
+  //load gLTF
+  gltfLOAD(scale=1/900){
     var f=this;
     var gltfLoader=new GLTFLoader();
     gltfLoader.load('./resources/gltfl_oader/scene.gltf',function(gltf){
       var gltfRoot=gltf.scene;
-      const box = new THREE.Box3().setFromObject(gltfRoot);
 
+      const box = new THREE.Box3().setFromObject(gltfRoot);
       const boxSize = box.getSize(new THREE.Vector3()).length();
       const boxCenter = box.getCenter(new THREE.Vector3());
 
-      gltfRoot.scale.set(1/100,1/100,1/100);
-      gltfRoot.position.y=3;
-      gltfRoot.position.z=3;
-      gltfRoot.position.x=3;
+      gltfRoot.scale.set(scale,scale,scale);
 
       f.mesh[0].add(gltfRoot);
 
@@ -172,10 +186,13 @@ class O_xyz {
   //MESH: rotation,position,scale
   operateMeshInRender(timeSec){
     this.mesh.forEach(function(mesh,i){
-      // mesh.rotation.y=timeSec/2;
       if(mesh.name==='Cars'){
         for(const car of mesh.children){
-          car.rotation.y=timeSec;
+          var scale=3*Math.sin(timeSec);
+          if(scale<1){
+            scale=1;
+          }
+          car.scale.set(scale,scale,scale);
         }
       }
     });
@@ -236,7 +253,7 @@ class O_xyz {
 
   //灯光
   addLight(){
-    /*let intensity=1.951;
+    let intensity=.951;
     this.light=new THREE.PointLight(0xffffff,intensity);
     this.light.position.set(1,50,9);
     //Then we also need to tell the light to cast a shadow
@@ -244,10 +261,10 @@ class O_xyz {
     let lightHelper=new THREE.PointLightHelper(this.light);
 
     this.scene.add(this.light);
-    this.scene.add(lightHelper);*/
+    this.scene.add(lightHelper);
 
 
-    {
+    /*{
       const skyColor = 0xB1E1FF;  // light blue
       const groundColor = 0xB97A20;  // brownish orange
       const intensity = 1;
@@ -262,7 +279,7 @@ class O_xyz {
       this.light2.position.set(5, 10, 2);
       this.scene.add(this.light2);
       this.scene.add(this.light2.target);
-    }
+    }*/
   }
 
   //gui
@@ -278,3 +295,5 @@ class O_xyz {
 
 window.obj=new O_xyz();
 window.obj.init();
+
+//Object3D===> https://www.jianshu.com/p/8c5360e3c0c3
