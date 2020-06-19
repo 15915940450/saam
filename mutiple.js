@@ -145,3 +145,10 @@ function main() {
 }
 
 main();
+
+
+var what=document.querySelector('.bcrect').getBoundingClientRect();
+console.log(what);
+
+//https://usefulangle.com/post/179/jquery-offset-vanilla-javascript
+
