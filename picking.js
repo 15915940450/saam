@@ -4,6 +4,7 @@ import {GUI} from './__3/dat.gui.module.js';
 
 window.__3=THREE;
 
+//ray casting
 class PickHelper {
   constructor(){
     this.raycaster=new THREE.Raycaster();
@@ -29,6 +30,9 @@ class PickHelper {
     }
   }
 }
+
+
+// To do GPU picking we render each object in a unique color offscreen. We then look up the color of the pixel corresponding to the mouse position. The color tells us which object was picked.
 
 class O_xyz {
   constructor(){
@@ -129,6 +133,7 @@ class O_xyz {
   //场景
   createScene(){
     this.scene=new THREE.Scene();
+    
     this.scene.background=new THREE.Color(0x333333);
 
     this.scene.add(this.cameraPole);
@@ -154,9 +159,16 @@ class O_xyz {
     
     var arrCubes=[];
 
+    var loader=new THREE.TextureLoader();
+    var texture=loader.load('./resources/images/frame.png');
+
     for(var i=0;i<this.cubeNums;i++){
       let material=new THREE.MeshPhongMaterial({
-        color:this.randHSL()
+        color:this.randHSL(),
+        map:texture,
+        transparent:true,
+        side:THREE.DoubleSide,
+        alphaTest:0.1  //可以给这个属性指定一个值（从 0 到 1）。如果某个像素的 alpha 值小于该值，那么该像素不会显示出来。可以使用这个属性移除一些与透明度相关的毛边。
       });
       let mesh=new THREE.Mesh(geometry,material);
 
@@ -204,7 +216,8 @@ class O_xyz {
 
   addPickEvent(){
     var f=this;
-    window.addEventListener('mousemove',function(ev){
+
+    var setPickPosition=function(ev){
       var pos={
         x:ev.clientX,
         y:ev.clientY
@@ -216,6 +229,10 @@ class O_xyz {
         x:2*pos.x/w-1,
         y:-(2*pos.y/h-1)
       };
+    };
+
+    window.addEventListener('mousemove',function(ev){
+      setPickPosition(ev);
     });
 
     var clearPickPosition=function(){
@@ -234,6 +251,21 @@ class O_xyz {
     window.addEventListener('mouseleave',function(){
       clearPickPosition();
     });
+
+    //support mobile
+    window.addEventListener('touchstart', (event) => {
+      // prevent the window from scrolling
+      event.preventDefault();
+      setPickPosition(event.touches[0]);
+    }, {passive: false});
+     
+    window.addEventListener('touchmove', (event) => {
+      setPickPosition(event.touches[0]);
+    });
+     
+    window.addEventListener('touchend', clearPickPosition);
+
+
   }
 
 
@@ -245,3 +277,29 @@ window.pickHelper=new PickHelper();
 
 window.obj=new O_xyz();
 window.obj.init();
+
+
+
+/*
+  //空的构造函数 -- 默认为白色
+  var color = new THREE.Color();
+
+  //十六进制颜色 （推荐使用）
+  var color = new THREE.Color( 0xff0000 );
+
+  //RGB 字符串
+  var color = new THREE.Color("rgb(255, 0, 0)");
+  var color = new THREE.Color("rgb(100%, 0%, 0%)");
+
+  //颜色值 - 140 种支持，不是驼峰命名
+  var color = new THREE.Color( 'skyblue' );
+
+  //HSL 字符串
+  var color = new THREE.Color("hsl(0, 100%, 50%)");
+
+  //RGB 值 在 0 到 1 之间
+  var color = new THREE.Color( 1, 0, 0 );
+  =================================================
+  console.log(new THREE.Color(1));
+  console.log(new THREE.Color('black'));
+*/
