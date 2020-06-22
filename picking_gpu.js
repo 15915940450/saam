@@ -40,7 +40,7 @@ class GPUPickHelper {
     renderer.readRenderTargetPixels(pickingTexture,0,0,1,1,pixelBuffer);
 
     var id=(pixelBuffer[0] << 16) | (pixelBuffer[1] << 8) | (pixelBuffer[2])
-    // console.log(id);
+    // console.log(pixelBuffer);
 
     var intersectedObject=obj.idToObject[id];
     if(intersectedObject){
@@ -61,9 +61,9 @@ class O_xyz {
     this.idToObject={};
   }
   init(){
+    this.createScene();
     this.createAcamera();
     this.createControls();
-    this.createScene();
     this.createRT();
     this.addMesh();
     this.addLight();
@@ -127,7 +127,7 @@ class O_xyz {
 
   //相机
   createAcamera(){
-    let fov=60;
+    let fov=45;
     let aspect=2; //默认是2
     let near=0.1;
     let far=200;
@@ -137,6 +137,9 @@ class O_xyz {
     this.camera.position.set(5,10,30);
     // this.camera.up.set(0,0,1);
     // this.camera.lookAt(0,0,0);
+    this.cameraPole=new THREE.Object3D();
+    this.cameraPole.add(this.camera);
+    this.scene.add(this.cameraPole);
   }
   //环绕控制
   createControls(){
@@ -166,61 +169,82 @@ class O_xyz {
   }
   //MESH: rotation,position,scale
   operateMeshInRender(timeSec){
-    
+    this.cameraPole.rotation.y=timeSec/8;
   }
   //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
-  createCube(color='floralwhite',scale=1){
-    var id=1;
+  createCube(){
     let width=4;
     let geometry=new THREE.BoxGeometry(width,width,width);
 
 
     var loader=new THREE.TextureLoader();
     var texture=loader.load('./resources/images/frame.png');
-    let material=new THREE.MeshPhongMaterial({
-      alphaTest:0.1,
-      color:color,
-      map:texture,
-      side:THREE.DoubleSide,
-      transparent:true
-    });
-    let mesh=new THREE.Mesh(geometry,material);
-    mesh.scale.set(scale,scale,scale);
-    mesh.rotation.y=-.4;
-    // mesh.castShadow=true;
-    // mesh.receiveShadow=true;
 
-    this.idToObject[id]=mesh;
+    function rand(min, max) {
+      if (max === undefined) {
+        max = min;
+        min = 0;
+      }
+      return min + (max - min) * Math.random();
+    }
 
-    this.scene.add(mesh);
+    function randomColor() {
+      return `hsl(${rand(360) | 0}, ${rand(50, 100) | 0}%, 50%)`;
+    }
+    for(var i=0;i<1e2;i++){
+      var id=i+1;
+      let material=new THREE.MeshPhongMaterial({
+        alphaTest:0.1,
+        color:randomColor(),
+        map:texture,
+        side:THREE.DoubleSide,
+        transparent:true
+      });
+      let mesh=new THREE.Mesh(geometry,material);
+      mesh.scale.set(rand(0.3,5),rand(0.3,5),rand(0.3,5));
+      mesh.rotation.set(rand(0.3,3),rand(0.3,3),rand(0.3,3));
+      mesh.position.set(rand(-50,50),rand(-50,50),rand(-50,50));
+      // mesh.castShadow=true;
+      // mesh.receiveShadow=true;
+
+      this.idToObject[id]=mesh;
+
+      this.scene.add(mesh);
 
 
-    var pickingMaterial=new THREE.MeshPhongMaterial({
-      alphaTest:.5,
-      blending:THREE.NoBlending,
-      color:new THREE.Color(0,0,0),
-      emissive:new THREE.Color(id),
-      map:texture,
-      side:THREE.DoubleSide,
-      specular:new THREE.Color(0,0,0),
-      transparent:true
-    });
-    var pickingMesh=new THREE.Mesh(geometry,pickingMaterial);
-    pickingMesh.scale.copy(mesh.scale);
-    pickingMesh.rotation.copy(mesh.rotation);
-    this.pickingScene.add(pickingMesh);
+
+      var pickingMaterial=new THREE.MeshPhongMaterial({
+        alphaTest:.5,
+        blending:THREE.NoBlending,
+        color:new THREE.Color(0,0,0),
+        emissive:new THREE.Color(id),
+        map:texture,
+        side:THREE.DoubleSide,
+        specular:new THREE.Color(0,0,0),
+        transparent:true
+      });
+      var pickingMesh=new THREE.Mesh(geometry,pickingMaterial);
+      pickingMesh.scale.copy(mesh.scale);
+      pickingMesh.rotation.copy(mesh.rotation);
+      pickingMesh.position.copy(mesh.position);
+      this.pickingScene.add(pickingMesh);
+    }
+    
+
+
+    
   }
 
   //灯光
   addLight(){
-    let intensity=.951;
+    let intensity=1.951;
     this.light=new THREE.PointLight(0xffffff,intensity);
     this.light.position.set(1,5,9);
     //Then we also need to tell the light to cast a shadow
     this.light.castShadow=true;
     let lightHelper=new THREE.PointLightHelper(this.light);
 
-    this.scene.add(this.light);
+    this.camera.add(this.light);
     // this.scene.add(lightHelper);
   }
 
