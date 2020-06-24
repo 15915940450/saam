@@ -11,6 +11,7 @@ class O_xyz {
   }
   init(){
     this.createRenderer();
+    this.createRT();
     this.createScene();
     this.createAcamera();
     this.createControls();
@@ -29,6 +30,27 @@ class O_xyz {
       i++;
       time=time/1000;
 
+      /*
+      Now at render time first we render the render target scene to the render target.
+      setRenderTarget: This method sets the active render target.
+      renderTarget -- The renderTarget that needs to be activated. When null is given, the canvas is set as the active render target instead.
+      */
+      var rtCube=f.rtScene.getObjectByName('cube');
+      // console.log(rtCube);
+      rtCube.rotation.y=time;
+      rtCube.rotation.x=time;
+
+      f.renderer.setRenderTarget(f.renderTarget);
+      f.renderer.render(f.rtScene,f.rtCamera);
+
+
+      //TypedArray
+      /*var tArray=new Uint8Array(4);
+      f.renderer.readRenderTargetPixels(f.renderTarget,f.renderTarget.width/2,f.renderTarget.height/2,1,1,tArray);
+      console.log(tArray);*/
+      
+
+
       //操作物件得以渲染出变化(运动)
       f.operateMeshInRender(time,i);
       
@@ -39,11 +61,50 @@ class O_xyz {
         f.camera.updateProjectionMatrix();
       }
 
+      f.renderer.setRenderTarget(null);
       f.renderer.render(f.scene,f.camera);
+
 
       window.requestAnimationFrame(rafCallback);
     };
     window.requestAnimationFrame(rafCallback);
+    return f;
+  }
+
+  createRT(){
+    var f=this;
+    var rtWidth=800;
+    var rtHeight=800;
+    this.renderTarget=new THREE.WebGLRenderTarget(rtWidth,rtHeight);
+
+    var rtFov=75;
+    var rtAspect=rtWidth/rtHeight;
+    var rtNear=0.1;
+    var rtFar=5;
+    this.rtCamera=new THREE.PerspectiveCamera(rtFov,rtAspect,rtNear,rtFar);
+    this.rtCamera.position.z=2;
+
+    this.rtScene=new THREE.Scene();
+    this.rtScene.background=new THREE.Color('red');
+
+    {
+      const color = 0xFFFFFF;
+      const intensity = 1;
+      const light = new THREE.DirectionalLight(color, intensity);
+      light.position.set(-1, 2, 4);
+      this.rtScene.add(light);
+    }
+
+    var geometry=new THREE.BoxGeometry(1,1,1);
+    var material=new THREE.MeshPhongMaterial({
+      color:0x309bff
+    });
+    var cube=new THREE.Mesh(geometry,material);
+
+    cube.name='cube';
+    cube.position.x=1;
+    this.rtScene.add(cube);
+
     return f;
   }
 
@@ -142,8 +203,7 @@ class O_xyz {
     let width=4;
     let geometry=new THREE.BoxGeometry(width,width,width);
     let material=new THREE.MeshPhongMaterial({
-      emissive:0x309bff,
-      color:color
+      map:this.renderTarget.texture
     });
     let mesh=new THREE.Mesh(geometry,material);
     mesh.scale.set(scale,scale,scale);
@@ -210,7 +270,7 @@ class O_xyz {
   //operate MESH: rotation,position,scale
   operateMeshInRender(timeSec,i){
     this.meshs.forEach(function(mesh,i){
-      mesh.rotation.y=timeSec/4;
+      // mesh.rotation.y=timeSec/4;
     });
 
     //==============首次进入，一次性
