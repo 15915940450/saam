@@ -175,7 +175,7 @@ class O_xyz {
   }
   //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
   createCube(){
-    let width=4;
+    let width=2;
     let geometry=new THREE.BoxGeometry(width,width,width);
 
 
