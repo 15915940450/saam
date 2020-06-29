@@ -1,5 +1,6 @@
 import * as THREE from './__3/three.module.js';
 import {OrbitControls} from './__3/OrbitControls.js';
+import {GLTFLoader} from './__three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {GUI} from './__3/dat.gui.module.js';
 
 window.__3=THREE;
@@ -13,13 +14,11 @@ class GPUPickHelper {
   }
 
   pick(time,renderer,obj){
-
-    // return false;
-    // console.log(this);
     var {pickingTexture,pixelBuffer}=this;
+      
 
     if(this.pickedObject){
-      this.pickedObject.material.emissive.setHex(this.pickedObjectSavedColor);
+      this.pickedObject.material.color.setHex(this.pickedObjectSavedColor);
       this.pickedObject=undefined;
     }
 
@@ -28,7 +27,7 @@ class GPUPickHelper {
     */
     var pixelRatio=renderer.getPixelRatio();
     var fullWidth=renderer.getContext().drawingBufferWidth;
-    var fullTop=renderer.getContext().drawingBufferHeight;  //drawingBufferHeight
+    var fullTop=renderer.getContext().drawingBufferHeight;
     var x=obj.pickPosition.x*pixelRatio | 0;
     var y=obj.pickPosition.y*pixelRatio | 0;
     obj.camera.setViewOffset(fullWidth,fullTop,x,y,1,1);
@@ -37,18 +36,19 @@ class GPUPickHelper {
     renderer.render(obj.pickingScene,obj.camera);
     renderer.setRenderTarget(null);
 
+
     obj.camera.clearViewOffset();
 
     renderer.readRenderTargetPixels(pickingTexture,0,0,1,1,pixelBuffer);
 
     var id=(pixelBuffer[0] << 16) | (pixelBuffer[1] << 8) | (pixelBuffer[2])
     // console.log(pixelBuffer); __rgba__ Uint8Array(4) [0, 0, 37, 255]
-
     var intersectedObject=obj.idToObject[id];
     if(intersectedObject){
+      // console.log(intersectedObject);
       this.pickedObject=intersectedObject;
-      this.pickedObjectSavedColor=this.pickedObject.material.emissive.getHex();
-      this.pickedObject.material.emissive.setHex((time * 8) % 2 > 1 ? 0xFFFF00 : 0xFF0000);
+      this.pickedObjectSavedColor=this.pickedObject.material.color.getHex();
+      this.pickedObject.material.color.setHex((time*1) % 2 > 1 ? 0xFF0000 : 0x0000FF);
     }
   }
 }
@@ -86,6 +86,7 @@ class O_xyz {
 
     //The first thing we need to do is turn on shadows in the renderer.
     // renderer.shadowMap.enabled=true;
+    // renderer.autoClearColor = false;
 
     
     //raf
@@ -132,7 +133,7 @@ class O_xyz {
     let fov=45;
     let aspect=2; //默认是2
     let near=0.1;
-    let far=200;
+    let far=100;
     //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
     this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
 
@@ -140,6 +141,7 @@ class O_xyz {
     // this.camera.up.set(0,0,1);
     // this.camera.lookAt(0,0,0);
     this.cameraPole=new THREE.Object3D();
+    this.cameraPole.name='cameraPole';
     this.cameraPole.add(this.camera);
     this.scene.add(this.cameraPole);
   }
@@ -167,75 +169,96 @@ class O_xyz {
 
   //物件
   addMesh(){
-    this.createCube();
+    this.loadgltf();
+  }
+  loadgltf(){
+    var f=this;
+    var loader=new GLTFLoader();
+    //转储物件结构
+    function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+      const localPrefix = isLast ? '└─' : '├─';
+      lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
+      const newPrefix = prefix + (isLast ? '  ' : '│ ');
+      const lastNdx = obj.children.length - 1;
+      obj.children.forEach((child, ndx) => {
+        const isLast = ndx === lastNdx;
+        dumpObject(child, lines, isLast, newPrefix);
+      });
+      return lines;
+    }
+
+    loader.load('./resources/gltfl_oader/pack1/scene_lut.gltf',function(gltf){
+      var root=gltf.scene;
+      f.scene.add(root);
+
+      
+      var dump=dumpObject(root).join('\n');
+      console.log(dump);
+
+
+      var id=0;
+      root.traverse(function(mesh){
+        if(mesh.type==='Mesh'){
+          id++;
+
+
+          mesh.material.depthWrite = true;
+          mesh.material.depthTest = true;
+
+          var scale=1/10;
+          mesh.scale.set(scale,scale,scale);
+
+          //重新定义材质
+          /*mesh.material=new THREE.MeshPhongMaterial({
+            color:new THREE.Color(1,1,0),
+            side:THREE.DoubleSide
+          });*/
+
+          // console.log(mesh);
+          f.idToObject[id]=mesh;
+
+
+
+          let pickingMaterial=new THREE.MeshPhongMaterial({
+            color:new THREE.Color(0,0,0),
+            emissive:new THREE.Color(id),
+            side:THREE.DoubleSide,
+            specular:new THREE.Color(0,0,0),
+          });
+
+
+          var pickingMesh=new THREE.Mesh(mesh.geometry,pickingMaterial);
+
+          pickingMesh.scale.copy(mesh.scale);
+          pickingMesh.rotation.copy(mesh.rotation);
+          pickingMesh.position.copy(mesh.position);
+
+          f.pickingScene.add(pickingMesh);
+        }
+      });
+
+
+
+      /*// http://www.yanhuangxueyuan.com/doc/three.js/vector3.html
+      var vector_3=new THREE.Vector3(1,59,0);
+      console.log(vector_3);
+
+      // http://www.yanhuangxueyuan.com/doc/three.js/bxo3.html
+      var box_3=new THREE.Box3();
+      console.log(box_3);*/
+
+
+      /*const box = new THREE.Box3().setFromObject(root);
+      console.log(box);*/
+    });
+    return f;
   }
   //MESH: rotation,position,scale
   operateMeshInRender(timeSec){
-    this.cameraPole.rotation.y=timeSec/8;
+    this.cameraPole.rotation.y=-timeSec/8;
   }
   //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
-  createCube(){
-    let width=2;
-    let geometry=new THREE.BoxGeometry(width,width,width);
-
-
-    var loader=new THREE.TextureLoader();
-    var texture=loader.load('./resources/images/frame.png');
-
-    function rand(min, max) {
-      if (max === undefined) {
-        max = min;
-        min = 0;
-      }
-      return min + (max - min) * Math.random();
-    }
-
-    function randomColor() {
-      return `hsl(${rand(360) | 0}, ${rand(50, 100) | 0}%, 50%)`;
-    }
-    for(var i=0;i<1e2;i++){
-      var id=i+1;
-      let material=new THREE.MeshPhongMaterial({
-        alphaTest:0.1,
-        color:randomColor(),
-        map:texture,
-        side:THREE.DoubleSide,
-        transparent:true
-      });
-      let mesh=new THREE.Mesh(geometry,material);
-      mesh.scale.set(rand(0.3,5),rand(0.3,5),rand(0.3,5));
-      mesh.rotation.set(rand(0.3,3),rand(0.3,3),rand(0.3,3));
-      mesh.position.set(rand(-50,50),rand(-50,50),rand(-50,50));
-      // mesh.castShadow=true;
-      // mesh.receiveShadow=true;
-
-      this.idToObject[id]=mesh;
-
-      this.scene.add(mesh);
-
-
-
-      var pickingMaterial=new THREE.MeshPhongMaterial({
-        alphaTest:.5,
-        blending:THREE.NoBlending,
-        color:new THREE.Color(0,0,0),
-        emissive:new THREE.Color(id),
-        map:texture,
-        side:THREE.DoubleSide,
-        specular:new THREE.Color(0,0,0),
-        transparent:true
-      });
-      var pickingMesh=new THREE.Mesh(geometry,pickingMaterial);
-      pickingMesh.scale.copy(mesh.scale);
-      pickingMesh.rotation.copy(mesh.rotation);
-      pickingMesh.position.copy(mesh.position);
-      this.pickingScene.add(pickingMesh);
-    }
-    
-
-
-    
-  }
+  
 
   //灯光
   addLight(){
