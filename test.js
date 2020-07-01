@@ -9,8 +9,6 @@ class O_xyz {
     this.canvas=document.querySelector('#c');
     this.elLabel=document.querySelector('#labels');
     this.meshs=[];
-
-    this.kelefeV=new THREE.Vector3();
   }
   init(){
     this.createRenderer();
@@ -106,7 +104,8 @@ class O_xyz {
     let cube=this.targetCube.mesh;
     rootObject3D.add(cube);
 
-    let sphere=this.createSphere();
+    this.targetSphere=this.createSphere('波-球');
+    let sphere=this.targetSphere.mesh;
     rootObject3D.add(sphere);
     
     
@@ -152,7 +151,7 @@ class O_xyz {
 
     mesh.name=name;
     mesh.scale.set(scale,scale,scale);
-    mesh.position.set(width+1,width/2,0);
+    mesh.position.set(width+1,width/2,-15);
     // mesh.rotation.y=-.4;
     mesh.castShadow=true;
     mesh.receiveShadow=true;
@@ -164,7 +163,7 @@ class O_xyz {
 
     return ({mesh,elem});
   }
-  createSphere(color='crimson',scale=1){
+  createSphere(name,color='crimson',scale=1){
     let radius=3;
     let geometry=new THREE.SphereGeometry(radius,50,50);
     let material=new THREE.MeshPhongMaterial({
@@ -172,12 +171,21 @@ class O_xyz {
       color:color
     });
     let mesh=new THREE.Mesh(geometry,material);
+
+    mesh.name=name;
+
     mesh.scale.set(scale,scale,scale);
     mesh.position.set(-radius-1,radius+2,0);
     mesh.castShadow=true;
     mesh.receiveShadow=true;
     this.meshs.push(mesh);
-    return (mesh);
+
+
+    var elem=document.createElement('div');
+    elem.textContent=name;
+    this.elLabel.appendChild(elem);
+
+    return ({mesh,elem});
   }
 
   //灯光
@@ -224,22 +232,51 @@ class O_xyz {
     });
 
 
-    // console.log(this.targetCube);
-    var {mesh,elem}=this.targetCube;
-    // mesh.rotation.y=timeSec/4;
-    // mesh.rotation.x=timeSec/3;
-    mesh.updateWorldMatrix(true,false);
-    mesh.getWorldPosition(this.kelefeV);
-    // console.log(this.kelefeV);
-    this.kelefeV.project(this.camera);
-    // console.log(this.kelefeV);
+    {
+      // console.log(this.targetCube);
+      let {mesh,elem}=this.targetCube;
+      // mesh.position.y=timeSec/10;
+      // mesh.rotation.x=timeSec/3;
+      // mesh.updateWorldMatrix(true,false);
 
-    var x=(this.kelefeV.x)*0.5*this.canvas.clientWidth+this.canvas.clientWidth*0.5;
-    var y=-(this.kelefeV.y)*0.5*this.canvas.clientHeight+this.canvas.clientHeight*0.5;
 
-    elem.style.transform=`
-      translate(-50%,-50%) translate(${x}px,${y}px)
-    `;
+      //1.获得世界坐标 get the position of the center of the cube
+      let kelefeV=new THREE.Vector3();
+      mesh.getWorldPosition(kelefeV);
+      //2.世界坐标转标准设备坐标(经过相机变换后的坐标)
+      /*
+      worldVector.project(camera);返回的结果是世界坐标worldVector在camera相机对象矩阵变化下对应的标准设备坐标， 标准设备坐标xyz的范围是[-1,1]
+      */
+      kelefeV.project(this.camera);
+
+      //算出荧幕坐标值(px)
+      /*let x=(this.kelefeV.x)*0.5*this.canvas.clientWidth+this.canvas.clientWidth*0.5;
+      let y=-(this.kelefeV.y)*0.5*this.canvas.clientHeight+this.canvas.clientHeight*0.5;*/
+      /*Xpx=width(x+1)/2;
+      Ypx=-height(y-1)/2;*/
+      let Xpx=this.canvas.clientWidth*(kelefeV.x+1)/2;
+      let Ypx=-this.canvas.clientHeight*(kelefeV.y-1)/2;
+
+      elem.style.transform=`
+        translate(-50%,-50%) translate(${Xpx}px,${Ypx}px)
+      `;
+    }
+
+    {
+      let {mesh,elem}=this.targetSphere;
+
+      let kelefeV=new THREE.Vector3();
+
+      mesh.getWorldPosition(kelefeV);
+      kelefeV.project(this.camera);
+
+      let x=(kelefeV.x)*0.5*this.canvas.clientWidth+this.canvas.clientWidth*0.5;
+      let y=-(kelefeV.y)*0.5*this.canvas.clientHeight+this.canvas.clientHeight*0.5;
+
+      elem.style.transform=`
+        translate(-50%,-50%) translate(${x}px,${y}px)
+      `;
+    }
 
 
     //==============首次进入，一次性
