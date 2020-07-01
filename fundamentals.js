@@ -1,5 +1,12 @@
-import * as THREE from './__three.js-master/build/three.module.js';
+import * as THREE from './__3/three.module.js';
 //===============================================
+var elBox=document.querySelector('.box');
+console.log(elBox.className,elBox.className==='box');
+console.log(elBox.textContent);
+console.log(elBox.innerHTML);
+console.log(elBox.innerHTML===elBox.textContent);
+
+
 // https://threejsfundamentals.org/threejs/lessons/threejs-scenegraph.html
 function main() {
   const canvas = document.querySelector('#c_copy');
@@ -50,7 +57,6 @@ function main() {
   sunMesh.add(axes);
 
 
-  console.log(axes);
   objects.push(sunMesh);
 
   const earthOrbit = new THREE.Object3D();
@@ -82,7 +88,7 @@ function main() {
 
   // add an AxesHelper to each node
   objects.forEach((node) => {
-    console.log(node.type); //Object3D,Mesh
+    // console.log(node.type); //Object3D,Mesh
     /*if(node.type!=='Object3D'){
       var axes=new THREE.AxesHelper(10);
       axes.material.depthTest=false;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>local_three.js</title>
+  <title>filter:grayscale(100%);</title>
   <meta charset="UTF-8" />
   <style>
     /* 1.clip-path */
@@ -41,7 +41,8 @@
     }
     /*5.filter*/
     html,body{
-      filter:grayscale(100%);
+      /*filter:grayscale(100%);*/
+      padding-bottom: 90px;
     }
     .mc p{
       width: 190px;
@@ -156,6 +157,21 @@
     .demo_section7:hover {
       animation-play-state: paused;
     }
+
+
+    .transform{
+      transform: translate(-50%,-50%) translate(100px,0px)  translate(50px,0px) rotate(30deg)  rotate(60deg);
+      transform:scale(.333,.333) scale(3,3);
+    }
+    .box{
+      width: 300px;
+      height: 50px;
+      background:#309bff;
+      color: floralwhite;
+      border: 1px solid floralwhite;
+      margin-left: 150px;
+      opacity: 0.5;
+    }
   </style>
 </head>
 <body>
@@ -174,7 +190,7 @@
     <span>香港地铁有限公司</span>
   </div>
   <div class="flex">
-    <section class="demo_section7 demo_section">demo2</section>
+    <section class="demo_section7 demo_section">demo_section7</section>
     <section class="demo_section demo_section1">demo</section>
     <section class="demo_section2 demo_section">demo2</section>
     <section class="demo_section3 demo_section">demo2</section>
@@ -186,6 +202,22 @@
   <div class="bezier">
     <input type="text">
     <p>kkk focus transform cubic bezier</p>
+  </div>
+
+  <div>
+    <canvas id="c_copy"></canvas>
+  </div>
+
+
+
+  <div>
+    <h2>1/7/2020 transform</h2>
+    <div class="   box   kklk">
+      transform:translate,rotate,scale
+    </div>
+    <div class="transform box">
+      transform:translate,rotate,scale
+    </div>
   </div>
   <script src="./fundamentals.js" type="module"></script>
   <!-- <script src="./index.js" type="module"></script> -->

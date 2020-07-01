@@ -1,124 +1,269 @@
 import * as THREE from './__3/three.module.js';
+import {OrbitControls} from './__3/OrbitControls.js';
+import {GUI} from './__3/dat.gui.module.js';
 
-function main() {
-  const canvas = document.querySelector('#c');
-  const renderer = new THREE.WebGLRenderer({canvas});
-  renderer.autoClearColor = false;
-  const fov = 75;
-  const aspect = 2;  // the canvas default
-  const near = 0.1;
-  const far = 10;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.z = 5;
-  const scene = new THREE.Scene();
+window.__3=THREE;
 
+class O_xyz {
+  constructor(){
+    this.canvas=document.querySelector('#c');
+    this.elLabel=document.querySelector('#labels');
+    this.meshs=[];
 
-  const fragmentShader=`
-    #include <common>
-    uniform vec3 iResolution;
-    uniform float iTime;
-    uniform sampler2D iChannel0;
-    varying vec2 vUv;
+    this.kelefeV=new THREE.Vector3();
+  }
+  init(){
+    this.createRenderer();
+    this.createScene();
+    this.createAcamera();
+    this.createControls();
+    this.addMesh();
+    this.addLight();
+    this.gui();
 
+    this.raf();
+  }
 
-    //========================================================
-    #define TIMESCALE 0.25 
-    #define TILES 8
-    #define COLOR 0.7, 1.6, 2.8
+  raf(){
+    var f=this;
+    var i=0;
+    //raf
+    let rafCallback=function(time){
+      i++;
+      time=time/1000;
 
-    void mainImage( out vec4 fragColor, in vec2 fragCoord )
-    {
-      vec2 uv = fragCoord.xy / iResolution.xy;
-      uv.x *= iResolution.x / iResolution.y;
+      //操作物件得以渲染出变化(运动)
+      f.operateMeshInRender(time,i);
       
-      vec4 noise = texture2D(iChannel0, floor(uv * float(TILES)) / float(TILES));
-      float p = 1.0 - mod(noise.r + noise.g + noise.b + iTime * float(TIMESCALE), 1.0);
-      p = min(max(p * 3.0 - 1.8, 0.1), 2.0);
       
-      vec2 r = mod(uv * float(TILES), 1.0);
-      r = vec2(pow(r.x - 0.5, 2.0), pow(r.y - 0.5, 2.0));
-      p *= 1.0 - pow(min(1.0, 12.0 * dot(r, r)), 2.0);
-      
-      fragColor = vec4(COLOR, 1.0) * p;
+      //camera aspect
+      if(f.resizeRenderer2DisplaySize(f.renderer)){
+        f.camera.aspect=f.canvas.clientWidth/f.canvas.clientHeight;
+        f.camera.updateProjectionMatrix();
+      }
+
+      f.renderer.render(f.scene,f.camera);
+
+      window.requestAnimationFrame(rafCallback);
+    };
+    window.requestAnimationFrame(rafCallback);
+    return f;
+  }
+
+  //===创建渲染器
+  createRenderer(){
+    let f=this;
+    f.renderer=new THREE.WebGLRenderer({
+      canvas:this.canvas
+    });
+
+    //The first thing we need to do is turn on shadows in the renderer.
+    f.renderer.shadowMap.enabled=true;
+  }
+
+
+  //场景
+  createScene(){
+    this.scene=new THREE.Scene();
+    this.scene.background=new THREE.Color(0x333333);
+  }
+
+  //相机
+  createAcamera(){
+    let fov=45;
+    let aspect=2; //默认是2
+    let near=0.1;
+    let far=100;
+    //摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。
+    this.camera=new THREE.PerspectiveCamera(fov,aspect,near,far);
+
+    this.camera.position.set(5,10,30);
+    // this.camera.up.set(0,0,1);
+    // this.camera.lookAt(0,0,0);
+  }
+  //环绕控制
+  createControls(){
+    this.controls=new OrbitControls(this.camera,this.canvas);
+    this.controls.target.set(0,4,0);
+    this.controls.update();
+  }
+
+
+  //物件
+  addMesh(){
+    let f=this;
+
+
+    //rootObject3D
+    let rootObject3D=new THREE.Object3D();
+    this.meshs.push(rootObject3D);
+
+
+    let plane=this.createPlane();
+    rootObject3D.add(plane);
+    
+    this.targetCube=this.createCube('方体');
+    let cube=this.targetCube.mesh;
+    rootObject3D.add(cube);
+
+    let sphere=this.createSphere();
+    rootObject3D.add(sphere);
+    
+    
+    //最后我们将root添加到场景中。
+    f.scene.add(f.meshs[0]);
+  }
+  
+  //We also need to go to each mesh in the scene and decide if it should both cast shadows and/or receive shadows.
+  createPlane(){
+    let width=30;
+    let geometry=new THREE.PlaneGeometry(width,width);
+    // let geometry=new THREE.WireframeGeometry(box_geometry);
+
+
+    let loader=new THREE.TextureLoader();
+    let texture=loader.load('./resources/images/checker2_2.png');
+    // console.log(texture);
+    texture.wrapS=THREE.RepeatWrapping;
+    texture.wrapT=THREE.RepeatWrapping;
+    texture.magFilter=THREE.NearestFilter;
+    let repeats=width/2;
+    texture.repeat.set(repeats,repeats);
+    let material=new THREE.MeshPhongMaterial({
+      map:texture,
+      side:THREE.DoubleSide
+    });
+
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.rotation.x=-Math.PI/2;
+    mesh.receiveShadow=true;
+
+    // this.meshs.push(mesh);
+    return (mesh);
+  }
+  createCube(name,color='floralwhite',scale=1){
+    let width=4;
+    let geometry=new THREE.BoxGeometry(width,width,width);
+    let material=new THREE.MeshPhongMaterial({
+      emissive:0x309bff,
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+
+    mesh.name=name;
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(width+1,width/2,0);
+    // mesh.rotation.y=-.4;
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+    this.meshs.push(mesh);
+
+    var elem=document.createElement('div');
+    elem.textContent=name;
+    this.elLabel.appendChild(elem);
+
+    return ({mesh,elem});
+  }
+  createSphere(color='crimson',scale=1){
+    let radius=3;
+    let geometry=new THREE.SphereGeometry(radius,50,50);
+    let material=new THREE.MeshPhongMaterial({
+      flatShading:true,
+      color:color
+    });
+    let mesh=new THREE.Mesh(geometry,material);
+    mesh.scale.set(scale,scale,scale);
+    mesh.position.set(-radius-1,radius+2,0);
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+    this.meshs.push(mesh);
+    return (mesh);
+  }
+
+  //灯光
+  addLight(){
+    let intensity=.951;
+    this.light=new THREE.PointLight(0xffffff,intensity);
+    this.light.position.set(1,5,9);
+    //Then we also need to tell the light to cast a shadow
+    this.light.castShadow=true;
+    let lightHelper=new THREE.PointLightHelper(this.light);
+
+    this.scene.add(this.light);
+    this.scene.add(lightHelper);
+  }
+
+  //gui
+  gui(){
+    let gui=new GUI();
+    gui.add(this.light,'intensity',0,2,0.001);
+  }
+
+  //set canvas drawingbuffer
+  resizeRenderer2DisplaySize(){
+    var f=this;
+    let needResize=true;
+    let targetWidth=this.canvas.clientWidth*window.devicePixelRatio | 0;
+    let targetHeight=this.canvas.clientHeight*window.devicePixelRatio | 0;
+
+    if(targetWidth===this.canvas.width && targetHeight===this.canvas.height){
+      needResize=false;
     }
-    //========================================================幟
 
-
-    void main() {
-      mainImage(gl_FragColor, vUv*iResolution.xy);
+    if(needResize){
+      f.renderer.setSize(targetWidth,targetHeight,false);
     }
+
+    return (needResize);
+  }
+
+  //operate MESH: rotation,position,scale
+  operateMeshInRender(timeSec,i){
+    this.meshs.forEach(function(mesh,i){
+      // mesh.rotation.y=timeSec/4;
+    });
+
+
+    // console.log(this.targetCube);
+    var {mesh,elem}=this.targetCube;
+    // mesh.rotation.y=timeSec/4;
+    // mesh.rotation.x=timeSec/3;
+    mesh.updateWorldMatrix(true,false);
+    mesh.getWorldPosition(this.kelefeV);
+    // console.log(this.kelefeV);
+    this.kelefeV.project(this.camera);
+    // console.log(this.kelefeV);
+
+    var x=(this.kelefeV.x)*0.5*this.canvas.clientWidth+this.canvas.clientWidth*0.5;
+    var y=-(this.kelefeV.y)*0.5*this.canvas.clientHeight+this.canvas.clientHeight*0.5;
+
+    elem.style.transform=`
+      translate(-50%,-50%) translate(${x}px,${y}px)
     `;
-  const vertexShader=`
-    varying vec2 vUv;
-    void main(){
-      vUv=uv;
-      gl_Position= projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    }
-  `;
-
-  var loader=new THREE.TextureLoader();
-  //https://threejsfundamentals.org/threejs/resources/images/bayer.png
-  var texture=loader.load('./resources/images/bayer.png');
-
-  texture.minFilter=THREE.NearestFilter;
-  texture.magFilter = THREE.NearestFilter;
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-
-  const uniforms={
-    iTime:{
-      value:0
-    },
-    iResolution:{
-      value:new THREE.Vector3(1,1,1)
-    },
-    iChannel0:{
-      value:texture
-    }
-  };
 
 
+    //==============首次进入，一次性
+    if(i===1){
+      //添加辅助axes,grid
+      this.meshs.forEach(function(mesh,i){
+
+        // console.log(mesh);
+
+        if(mesh.type==='Mesh'){
+          //Mesh,Object3D
+          let axes=new THREE.AxesHelper(3);
+          // axes.material.depthTest=false;
+          mesh.add(axes);
+        }else{
+          let grid=new THREE.GridHelper(10,10);
+          mesh.add(grid);
+        }
+      });
+    } //end if
+  } //functions end width operateMeshInRender
+} //end class
 
 
-  const geometry = new THREE.BoxGeometry(3,3,1);
-  const material = new THREE.ShaderMaterial({
-      fragmentShader:fragmentShader,
-      uniforms:uniforms,
-      vertexShader:vertexShader
-  });
-  var cube=new THREE.Mesh(geometry, material);
-  scene.add(cube);
+window.obj=new O_xyz();
+window.obj.init();
 
-
-
-
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-    }
-    return needResize;
-  }
-
-  function render(time) {
-    time=time/1000;
-    resizeRendererToDisplaySize(renderer);
-    cube.rotation.y=time/3;
-    cube.rotation.x=time/4;
-
-    var canvas=renderer.domElement;
-    // console.log(canvas);
-    uniforms.iTime.value=time;
-
-    renderer.render(scene, camera);
-
-    requestAnimationFrame(render);
-  }
-
-  requestAnimationFrame(render);
-}
-
-main();
