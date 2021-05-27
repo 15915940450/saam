@@ -2,7 +2,7 @@
   "name": "saam",
   "version": "1.0.0",
   "description": "learning three.js",
-  "main": "entry.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/15915940450/saam#readme",
   "dependencies": {
+    "lodash": "^4.17.21",
     "obj2gltf": "^3.1.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
   }
 }
