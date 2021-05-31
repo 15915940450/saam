@@ -4,7 +4,8 @@
   "description": "learning three.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --env goal=local --env production"
   },
   "repository": {
     "type": "git",
