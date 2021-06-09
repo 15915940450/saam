@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "info": "webpack info",
     "build": "webpack --env goal=local --env production"
   },
   "repository": {

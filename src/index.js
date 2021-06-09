@@ -1,15 +1,27 @@
-import _ from 'lodash';
+// import _ from 'lodash';
+
+
+
+
+let str = 'https://www.cnblogs.com/gaoht/p/11310365.html'
+let link = '<a href="https://www.webpackjs.com/">https://www.webpackjs.com/</a>'
+
+// var compiled = _.template(str)
+// let result = compiled({
+//   version: '<script>alert("hahaha...")</script>'
+// })
+
+// console.log(typeof compiled)
+// console.log(result)
 
 function component() {
   const element = document.createElement('div');
-
-  // lodash（目前通过一个 script 引入）对于执行这一行是必需的
-  /*
-  * es6, commonjs, amd
-  * */
-  element.innerHTML = _.join(['Hello', 'webpack'], '__ES6，CommonJS 和 AMD__');
+  element.innerHTML = link
+  // element.innerHTML = _.join(['<h2>webpack is used to compile JavaScript modules', '.</h2>', link, result], '<br />');
 
   return element;
 }
 
 document.body.appendChild(component());
+
+
